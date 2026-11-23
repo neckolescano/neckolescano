@@ -547,34 +547,36 @@ def wrap(t, n):
 
 
 def card(name, title, kind, desc, tags, icon, accent, button_label="VIEW"):
-    W, H = 480, 260
+    # Sized so the README shows it at about 1:1, keeping the 2x text crisp.
+    W, H = 360, 276
     body = panel(0, 6, W, H - 6, C["a"])  # drop shadow
     body += panel(0, 0, W, H - 6, PAPER)
     body += rect(5, 5, W - 10, 8, accent)
 
-    body += panel(20, 28, 68, 68, MINT)
-    body += sprite(ICONS[icon], 30, 38, 4)
+    body += panel(18, 28, 68, 68, MINT)
+    body += sprite(ICONS[icon], 28, 38, 4)
 
-    body += text(title, 104, 36, 3, C["a"])
-    body += text(kind, 104, 70, 2, accent)
+    body += text(title, 100, 36, 3, C["a"])
+    body += text(kind, 100, 70, 2, accent)
 
-    for i, line in enumerate(wrap(desc, 36)[:3]):
-        body += text(line, 22, 118 + i * 22, 2, C["e"])
+    for i, line in enumerate(wrap(desc, 26)[:4]):
+        body += text(line, 20, 116 + i * 22, 2, C["e"])
 
-    x = 20
+    y = 214
+    x = 18
     for t in tags:
         tw = text_width(t, 2)
-        body += panel(x, 196, tw + 20, 30, MINT if accent == C["j"] else C["s"])
-        body += text(t, x + 10, 204, 2, C["a"])
-        x += tw + 28
+        body += panel(x, y, tw + 20, 30, MINT if accent == C["j"] else C["s"])
+        body += text(t, x + 10, y + 8, 2, C["a"])
+        x += tw + 26
 
-    label = f"{button_label} >"
-    lw = text_width(label, 2)
-    bx = W - lw - 50
-    body += panel(bx, 200, lw + 30, 32, C["a"])
-    body += panel(bx, 194, lw + 30, 32, C["d"])
-    body += rect(bx + 5, 199, lw + 20, 3, "#fff3c4")
-    body += text(label, bx + 15, 205, 2, C["a"])
+    # "Go" button.
+    bw = 44
+    bx = W - bw - 18
+    body += panel(bx, y + 4, bw, 32, C["a"])
+    body += panel(bx, y - 2, bw, 32, C["d"])
+    body += rect(bx + 5, y + 3, bw - 10, 3, "#fff3c4")
+    body += sprite(["a...", "aa..", "aaa.", "aaaa", "aaa.", "aa..", "a..."], bx + 16, y + 5, 2)
     save(name, svg(W, H, body, "", f"{title}: {desc.lower()}"))
 
 
