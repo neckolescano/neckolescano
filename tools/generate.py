@@ -311,13 +311,7 @@ def label(name, num, title, right, theme):
     rw = len(right) * 8.4 + 16
     b += f'<rect class="ln" x="{tw:.0f}" y="17.5" width="{W - tw - rw:.0f}" height="1" fill="{c["line2"]}"/>'
     b += mono(right, W, 22, c["muted"], 11, anchor="end")
-    lw = W - tw - rw
-    b += f'<circle class="tr" cx="{tw:.0f}" cy="18" r="2.5" fill="{c["accent"]}"/>'
-    style = (
-        f".tr{{animation:tr 9s {EASE_IO} infinite}}"
-        f"@keyframes tr{{0%{{transform:translateX(0);opacity:0}}10%{{opacity:1}}90%{{opacity:1}}100%{{transform:translateX({lw:.0f}px);opacity:0}}}}"
-    )
-    style += f".ln{{transform-box:fill-box;transform-origin:left;animation:ln 1.6s {EASE} both .2s}}@keyframes ln{{from{{transform:scaleX(0)}}}}"
+    style = f".ln{{transform-box:fill-box;transform-origin:left;animation:ln 1.6s {EASE} both .2s}}@keyframes ln{{from{{transform:scaleX(0)}}}}"
     save(name, theme, svg(W, H, b, style, f"{num} {title}"))
 
 
@@ -558,16 +552,11 @@ def skills(theme):
         y = 4 + row * rh
         b += f'<g class="fu" style="animation-delay:{.05 + i * .06:.2f}s">'
         b += f'<rect x="{x}" y="{y}" width="480" height="1" fill="{c["line"]}"/>'
-        b += f'<rect class="sw" style="animation-delay:{i * 1.2:.1f}s" x="{x}" y="{y}" width="480" height="1.5" fill="{c["accent"]}"/>'
         b += mono(f"0{i + 1}", x, y + 28, c["accent"], 11, weight=600)
         b += t(area, x + 40, y + 29, 16, c["text"], 700)
         b += t(tools, x + 40, y + 51, 14, c["muted"])
         b += "</g>"
-    sw = (
-        f".sw{{transform-box:fill-box;transform-origin:left;animation:sw 7.2s {EASE} infinite both}}"
-        "@keyframes sw{0%{transform:scaleX(0);opacity:1}12%{transform:scaleX(1);opacity:1}24%,100%{transform:scaleX(1);opacity:0}}"
-    )
-    framed("skills", theme, 1000, W, H, b, FADE_UP + sw, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
+    framed("skills", theme, 1000, W, H, b, FADE_UP, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
 
 
 # ---------------------------------------------------------------- certificates
