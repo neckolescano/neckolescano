@@ -68,7 +68,7 @@ def svg(w, h, body, style="", title="", defs=""):
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
         f'fill="none" role="img" aria-label="{esc(title)}"><title>{esc(title)}</title>'
-        f"<defs>{defs}</defs><style>{style}</style>{body}</svg>"
+        f"<defs>{defs}</defs><style>{style}{FRAME_CSS}</style>{body}</svg>"
     )
 
 
@@ -79,6 +79,11 @@ def save(name, theme, content):
         f.write(content)
     print(f"  {fn:28s} {len(content) // 1024} KB")
 
+
+FRAME_CSS = (
+    ".hd{opacity:0;animation:hd 6s cubic-bezier(.65,0,.35,1) infinite}"
+    "@keyframes hd{0%,100%{opacity:0}8%{opacity:.9}25%{opacity:0}}"
+)
 
 FADE_UP = (
     f".fu{{animation:fu 1.2s {EASE} both}}"
@@ -306,7 +311,13 @@ def label(name, num, title, right, theme):
     rw = len(right) * 8.4 + 16
     b += f'<rect class="ln" x="{tw:.0f}" y="17.5" width="{W - tw - rw:.0f}" height="1" fill="{c["line2"]}"/>'
     b += mono(right, W, 22, c["muted"], 11, anchor="end")
-    style = f".ln{{transform-box:fill-box;transform-origin:left;animation:ln 1.6s {EASE} both .2s}}@keyframes ln{{from{{transform:scaleX(0)}}}}"
+    lw = W - tw - rw
+    b += f'<circle class="tr" cx="{tw:.0f}" cy="18" r="2.5" fill="{c["accent"]}"/>'
+    style = (
+        f".tr{{animation:tr 9s {EASE_IO} infinite}}"
+        f"@keyframes tr{{0%{{transform:translateX(0);opacity:0}}10%{{opacity:1}}90%{{opacity:1}}100%{{transform:translateX({lw:.0f}px);opacity:0}}}}"
+    )
+    style += f".ln{{transform-box:fill-box;transform-origin:left;animation:ln 1.6s {EASE} both .2s}}@keyframes ln{{from{{transform:scaleX(0)}}}}"
     save(name, theme, svg(W, H, b, style, f"{num} {title}"))
 
 
@@ -317,8 +328,9 @@ def frame(W, H, left, right, c, top=24):
     if right:
         s += mono(right, W - 2, 13, c["faint"], 10.5, anchor="end")
     s += f'<rect x="1" y="{top}" width="{W - 2}" height="{H - top - 1}" rx="2" stroke="{c["line2"]}"/>'
-    for hx, hy in [(1, top), (W - 1, top), (1, H - 1), (W - 1, H - 1)]:
+    for i, (hx, hy) in enumerate([(1, top), (W - 1, top), (W - 1, H - 1), (1, H - 1)]):
         s += f'<rect x="{hx - 3.5}" y="{hy - 3.5}" width="7" height="7" fill="{c["page"]}" stroke="{c["muted"]}"/>'
+        s += f'<rect class="hd" style="animation-delay:{i * 1.5}s" x="{hx - 3.5}" y="{hy - 3.5}" width="7" height="7" fill="{c["accent"]}"/>'
     return s
 
 
@@ -342,12 +354,12 @@ def framed(name, theme, W, inner_w, inner_h, body, style, title, defs, left, rig
 # ---------------------------------------------------------------- nav buttons
 def nav(name, kind, label_, sub, theme):
     c = THEMES[theme]
-    W, H = 320, 78
+    W, H = 240, 78
     b = frame(W, H, kind, "", c, top=20)
     b += t(label_, 18, 52, 17, c["text"], 700)
     b += mono(sub, 18, 68, c["muted"], 9.5)
     b += (
-        f'<path class="ar" d="M{W - 34} 52 l10 -10 m-7 0 h7 v7" stroke="{c["accent"]}" stroke-width="1.8" '
+        f'<path class="ar" d="M{W - 30} 52 l10 -10 m-7 0 h7 v7" stroke="{c["accent"]}" stroke-width="1.8" '
         f'stroke-linecap="round" stroke-linejoin="round"/>'
     )
     style = f".ar{{animation:ar 3s {EASE_IO} infinite}}@keyframes ar{{50%{{transform:translate(2px,-2px)}}}}"
@@ -521,8 +533,9 @@ def footer(theme):
     W, H = 1000, 46
     b = f'<rect x="0" y="0" width="{W}" height="1" fill="{c["line2"]}"/>'
     b += mono("Draw it first. Build it layer by layer.", 0, 30, c["muted"], 10.5)
+    b += f'<rect class="cr" x="{39 * 7.5 + 4:.0f}" y="21" width="7" height="12" fill="{c["accent"]}"/>'
     b += mono("© 2026 Nicho Lescano · Davao City, PH", W, 30, c["faint"], 10.5, anchor="end")
-    save("footer", theme, svg(W, H, b, "", "Draw it first. Build it layer by layer."))
+    save("footer", theme, svg(W, H, b, ".cr{animation:cr 1.1s steps(1) infinite}@keyframes cr{50%{opacity:0}}", "Draw it first. Build it layer by layer."))
 
 
 # ---------------------------------------------------------------- skills
@@ -545,11 +558,59 @@ def skills(theme):
         y = 4 + row * rh
         b += f'<g class="fu" style="animation-delay:{.05 + i * .06:.2f}s">'
         b += f'<rect x="{x}" y="{y}" width="480" height="1" fill="{c["line"]}"/>'
+        b += f'<rect class="sw" style="animation-delay:{i * 1.2:.1f}s" x="{x}" y="{y}" width="480" height="1.5" fill="{c["accent"]}"/>'
         b += mono(f"0{i + 1}", x, y + 28, c["accent"], 11, weight=600)
         b += t(area, x + 40, y + 29, 16, c["text"], 700)
         b += t(tools, x + 40, y + 51, 14, c["muted"])
         b += "</g>"
-    framed("skills", theme, 1000, W, H, b, FADE_UP, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
+    sw = (
+        f".sw{{transform-box:fill-box;transform-origin:left;animation:sw 7.2s {EASE} infinite both}}"
+        "@keyframes sw{0%{transform:scaleX(0);opacity:1}12%{transform:scaleX(1);opacity:1}24%,100%{transform:scaleX(1);opacity:0}}"
+    )
+    framed("skills", theme, 1000, W, H, b, FADE_UP + sw, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
+
+
+# ---------------------------------------------------------------- certificates
+CERTS = [
+    ("HTML and CSS", "Awarded May 20, 2026"),
+    ("Databases", "Awarded May 13, 2026"),
+    ("Java", "Awarded Mar 12, 2025"),
+]
+
+
+def certificates(theme):
+    c = THEMES[theme]
+    W, H = 1000, 128
+    b = frame(W, H, "certificates.ledger", "Certiport · Pearson", c, top=22)
+    cw = (W - 2) / 3
+    style = ""
+    for i, (name, when) in enumerate(CERTS):
+        x = 1 + i * cw
+        if i:
+            b += f'<rect x="{x:.0f}" y="38" width="1" height="74" fill="{c["line"]}"/>'
+        cx, cy = x + 46, 75
+        # Seal: a slowly turning dashed ring, and a check that draws itself.
+        b += f'<circle class="ring{i}" cx="{cx:.0f}" cy="{cy}" r="25" stroke="{c["accent"]}" stroke-width="1.2" stroke-dasharray="3 4"/>'
+        b += f'<circle cx="{cx:.0f}" cy="{cy}" r="18" fill="{c["accent"]}" fill-opacity="0.12" stroke="{c["accent"]}" stroke-opacity="0.5"/>'
+        b += (
+            f'<path class="chk{i}" d="M{cx - 7:.0f} {cy} l5 5 l9 -10" stroke="{c["accent"]}" stroke-width="2.4" '
+            f'stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1"/>'
+        )
+        tx = x + 88
+        b += mono("IT Specialist", tx, 58, c["muted"], 9.5, weight=600)
+        b += t(name, tx, 82, 18, c["text"], 700, ls=-0.3)
+        b += mono(when, tx, 101, c["muted"], 9.5)
+        d = i * 0.6
+        style += (
+            f".ring{i}{{transform-box:fill-box;transform-origin:center;animation:spin {24 + i * 4}s linear infinite}}"
+            f".chk{i}{{animation:chk 6s {EASE} infinite both {d:.1f}s}}"
+        )
+    style += (
+        "@keyframes spin{to{transform:rotate(360deg)}}"
+        "@keyframes chk{0%,8%{stroke-dashoffset:1}30%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:1}}"
+    )
+    title = "Certificates: IT Specialist (Certiport, Pearson) in " + ", ".join(f"{n} ({w.lower()})" for n, w in CERTS)
+    save("certificates", theme, svg(W, H, b, style, title))
 
 
 PROJECTS = [
@@ -611,9 +672,12 @@ if __name__ == "__main__":
         label("label-skills", "03", "Skills", "What I build with", th)
         now(th)
         footer(th)
-        nav("nav-portfolio", "Portfolio", "nicho-dev.vercel.app", "Case studies and the 3D room", th)
+        nav("nav-portfolio", "Portfolio", "nicho-dev.vercel.app", "Case studies, 3D room", th)
         nav("nav-email", "Direct line", "Email me", "neckolescano36@gmail.com", th)
-        nav("nav-kuwago", "Live app", "kuwaGO", "Early access, heading to Play", th)
+        nav("nav-kuwago", "Live app", "kuwaGO", "Early access", th)
+        nav("nav-resume", "Resume", "Download PDF", "From nicho-dev.vercel.app", th)
+        label("label-certs", "04", "Certificates", "3 earned", th)
+        certificates(th)
         for p in PROJECTS:
             card(p, th)
         skills(th)

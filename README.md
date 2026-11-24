@@ -3,9 +3,10 @@
 <a href="https://nicho-dev.vercel.app"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/hero-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/hero-light.svg" /><img src="./assets/hero-light.svg" width="100%" alt="Nicho Lescano. UI/UX designer and developer, also into machine learning and AI automation. I draw every project first, then build it, layer by layer. 3 systems shipped, 201 automated tests, 18 real testers, 30 days to ship kuwaGO." /></picture></a>
 
 <p align="center">
-  <a href="https://nicho-dev.vercel.app"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/nav-portfolio-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/nav-portfolio-light.svg" /><img src="./assets/nav-portfolio-light.svg" width="32%" alt="Portfolio: nicho-dev.vercel.app" /></picture></a>
-  <a href="mailto:neckolescano36@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/nav-email-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/nav-email-light.svg" /><img src="./assets/nav-email-light.svg" width="32%" alt="Email me" /></picture></a>
-  <a href="https://neckolescano.github.io/kuwaGO/"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/nav-kuwago-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/nav-kuwago-light.svg" /><img src="./assets/nav-kuwago-light.svg" width="32%" alt="kuwaGO live app" /></picture></a>
+  <a href="https://nicho-dev.vercel.app"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/nav-portfolio-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/nav-portfolio-light.svg" /><img src="./assets/nav-portfolio-light.svg" width="23.5%" alt="Portfolio: nicho-dev.vercel.app" /></picture></a>
+  <a href="mailto:neckolescano36@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/nav-email-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/nav-email-light.svg" /><img src="./assets/nav-email-light.svg" width="23.5%" alt="Email me" /></picture></a>
+  <a href="https://neckolescano.github.io/kuwaGO/"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/nav-kuwago-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/nav-kuwago-light.svg" /><img src="./assets/nav-kuwago-light.svg" width="23.5%" alt="kuwaGO live app" /></picture></a>
+  <a href="https://nicho-dev.vercel.app/assets/Nicho-Lescano-Resume.pdf"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/nav-resume-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/nav-resume-light.svg" /><img src="./assets/nav-resume-light.svg" width="23.5%" alt="Resume (PDF)" /></picture></a>
 </p>
 
 <br />
@@ -57,6 +58,12 @@
 <picture><source media="(prefers-color-scheme: dark)" srcset="./assets/label-skills-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/label-skills-light.svg" /><img src="./assets/label-skills-light.svg" width="100%" alt="03 Skills" /></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="./assets/skills-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/skills-light.svg" /><img src="./assets/skills-light.svg" width="100%" alt="Design: Figma, UI/UX, brand and logo, prototyping. Web: Laravel, PHP, JavaScript, REST APIs. Mobile: Flutter, Dart, Firebase. Desktop: C#, .NET WinForms, ASP.NET API. Data: MySQL, SQL Server, EF Core. AI and ML: machine learning, AI automation, Gemini." /></picture>
+
+<br />
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/label-certs-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/label-certs-light.svg" /><img src="./assets/label-certs-light.svg" width="100%" alt="04 Certificates" /></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/certificates-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/certificates-light.svg" /><img src="./assets/certificates-light.svg" width="100%" alt="Certificates: IT Specialist (Certiport, Pearson) in HTML and CSS (May 20, 2026), Databases (May 13, 2026) and Java (March 12, 2025)." /></picture>
 
 <br />
 
