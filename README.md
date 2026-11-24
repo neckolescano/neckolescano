@@ -29,9 +29,9 @@
   <a href="https://github.com/neckolescano/Nicho.dev"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/card-nichodev-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/card-nichodev-light.svg" /><img src="./assets/card-nichodev-light.svg" width="48.5%" alt="Fig. 04 Nicho.dev, portfolio site, live. Layered project stacks, case studies and a 3D room. HTML, CSS, JavaScript, Three.js." /></picture></a>
 </p>
 <p align="center">
-  <a href="https://github.com/neckolescano/sagap"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/card-sagap-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/card-sagap-light.svg" /><img src="./assets/card-sagap-light.svg" width="48.5%" alt="Fig. 05 sagap, mobile app. A Wi-Fi dead zone mapper. Flutter, Dart." /></picture></a>
+  <a href="https://github.com/neckolescano/sagap"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/card-sagap-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/card-sagap-light.svg" /><img src="./assets/card-sagap-light.svg" width="48.5%" alt="Fig. 05 sagap, mobile app, in progress. Maps Wi-Fi signal into a heatmap that shows dead zones, with AR scanning. Flutter, Dart. 29 test files." /></picture></a>
   &nbsp;
-  <a href="https://github.com/neckolescano/IT5-payroller"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/card-payroller-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/card-payroller-light.svg" /><img src="./assets/card-payroller-light.svg" width="48.5%" alt="Fig. 06 PayRoller, desktop app. A payroll system with employee records, pay computation and history. Python, PyQt6, SQLite." /></picture></a>
+  <a href="https://github.com/neckolescano/IT5-payroller"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/card-payroller-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/card-payroller-light.svg" /><img src="./assets/card-payroller-light.svg" width="48.5%" alt="Fig. 06 PayRoller, desktop app, coursework. A payroll system with employee records, pay computation and history. Python, PyQt6, SQLite." /></picture></a>
 </p>
 
 </div>

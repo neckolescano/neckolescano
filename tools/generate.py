@@ -454,15 +454,17 @@ def art_payroll(c, x0, y0):
 # ---------------------------------------------------------------- project card (compact)
 def card(p, theme):
     c = THEMES[theme]
-    W, H = 490, 338
+    W, H = 490, 330
     top = 22
     b = frame(W, H, p["fig"], p["size"], c, top)
-    ax, ay, aw, ah = 14, top + 13, W - 28, 140
+    ax, ay, aw, ah = 14, top + 13, W - 28, 132
     b += f'<rect x="{ax}" y="{ay}" width="{aw}" height="{ah}" rx="2" fill="url(#dg)"/>'
     art, astyle = p["art"](c, 0, 0)
-    sc = 0.58
-    bw, bh = 330 * sc, p.get("art_h", 214) * sc
-    b += f'<g class="fu" style="animation-delay:.1s"><g transform="translate({ax + (aw - bw) / 2:.0f} {ay + (ah - bh) / 2:.0f}) scale({sc})">{art}</g></g>'
+    bx_, by_, bw_, bh_ = p.get("box", (0, 0, 330, 214))
+    sc = 112 / bh_  # every mockup is drawn at the same height
+    dx = ax + (aw - bw_ * sc) / 2 - bx_ * sc
+    dy = ay + (ah - bh_ * sc) / 2 - by_ * sc
+    b += f'<g class="fu" style="animation-delay:.1s"><g transform="translate({dx:.1f} {dy:.1f}) scale({sc:.4f})">{art}</g></g>'
     b += f'<rect x="14" y="{ay + ah + 12}" width="{W - 28}" height="1" fill="{c["line"]}"/>'
     y = ay + ah + 42
     b += f'<g class="fu" style="animation-delay:.15s">{t(p["name"], 14, y, 23, c["text"], 800, ls=-0.7)}</g>'
@@ -556,7 +558,7 @@ PROJECTS = [
         desc="A cozy study garden: focus and your plant grows, give up and it wilts. AI turns your notes into quizzes.", status="Early access",
         stack="Flutter · Firebase · Gemini · Cloudflare Workers",
         proof=[("30", "days to ship"), ("18", "testers"), ("72", "tests")],
-        art=art_kuwago,
+        art=art_kuwago, box=(0, -12, 316, 208),
     ),
     dict(
         file="card-cinematheque", fig="Fig. 02 / Web system", size="1440 × 900", name="Cinematheque",
@@ -570,7 +572,7 @@ PROJECTS = [
         desc="A customer system for stores that sell gaming PC parts: who each customer is, what they buy, owe and need.", status="In progress",
         stack="C# · .NET WinForms · SQL Server · EF Core",
         proof=[("15", "use cases"), ("4", "user roles"), ("1", "database per store")],
-        art=art_xpera, art_h=200,
+        art=art_xpera, box=(0, 0, 330, 200),
     ),
     dict(
         file="card-nichodev", fig="Fig. 04 / Portfolio site", size="1440 × 900", name="Nicho.dev",
@@ -580,13 +582,14 @@ PROJECTS = [
         art=art_nichodev,
     ),
     dict(
-        file="card-sagap", fig="Fig. 05 / Mobile app", size="390 × 844", name="sagap",
-        desc="A Wi-Fi dead zone mapper: see where the signal is strong and where it drops out.",
-        stack="Flutter · Dart",
+        file="card-sagap", fig="Fig. 05 / Mobile app", size="390 × 844", name="sagap", status="In progress",
+        desc="Walk your home and map Wi-Fi signal into a heatmap that shows dead zones, with AR scanning and what-if fixes.",
+        stack="Flutter · Dart · AR",
+        proof=[("29", "test files"), ("10", "features")],
         art=art_sagap,
     ),
     dict(
-        file="card-payroller", fig="Fig. 06 / Desktop app", size="1280 × 800", name="PayRoller",
+        file="card-payroller", fig="Fig. 06 / Desktop app", size="1280 × 800", name="PayRoller", status="Coursework",
         desc="A payroll system: employee records, automatic pay computation and payroll history.",
         stack="Python · PyQt6 · SQLite",
         proof=[("3", "modules"), ("1", "local database")],
