@@ -1,225 +1,59 @@
 """Generates the SVGs used in the profile README.
 
 Run:  python tools/generate.py   (writes into assets/)
-Smooth, rounded layouts with real system-font text, plus small pixel-art
-accents (icons, sparkles, cursor, the name) drawn from rectangles.
+
+Every graphic is written twice, as name-dark.svg and name-light.svg, with a
+transparent background, so the README can swap them with <picture> and the
+art sits directly on GitHub's own page colour instead of in a box.
+The look follows nicho-dev.vercel.app: cream / ink type, an orange accent,
+small monospace labels and stacked wireframe layers.
 """
-import math
 import os
-import random
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets")
 
-# ---------------------------------------------------------------- palette
-# Pixel-art colours: warm ink, wood, gold and leaf greens.
-C = {
-    "a": "#2b1a10",  # ink (outline)
-    "b": "#8b5a34",  # brown
-    "c": "#fff4e0",  # cream highlight
-    "d": "#e8b84b",  # gold
-    "e": "#5a3a22",  # dark bark
-    "f": "#f6dfc0",  # owl belly
-    "g": "#b8862a",  # dark gold
-    "h": "#b97a45",  # wood
-    "i": "#7cb350",  # leaf
-    "j": "#3f7a2e",  # deep green
-    "k": "#8fb8de",  # sky blue
-    "l": "#b5523b",  # brick
-    "m": "#c9b99a",  # stone
-    "n": "#2f3e5c",  # night
-    "p": "#e98b8b",  # petal pink
-    "w": "#fffaf0",  # cloud
-    "s": "#efe4cc",  # cloud shade
-    "t": "#d39a62",  # wood highlight
-}
-PAPER = "#fbf3e2"
-MINT = "#dcefc8"
+SANS = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif"
+MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, Menlo, monospace"
+EASE = "cubic-bezier(.22,1,.36,1)"  # long, soft ease-out
+EASE_IO = "cubic-bezier(.65,0,.35,1)"
 
-# ---------------------------------------------------------------- 5x7 font
-FONT = {
-    "A": [".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#"],
-    "B": ["####.", "#...#", "#...#", "####.", "#...#", "#...#", "####."],
-    "C": [".###.", "#...#", "#....", "#....", "#....", "#...#", ".###."],
-    "D": ["####.", "#...#", "#...#", "#...#", "#...#", "#...#", "####."],
-    "E": ["#####", "#....", "#....", "####.", "#....", "#....", "#####"],
-    "F": ["#####", "#....", "#....", "####.", "#....", "#....", "#...."],
-    "G": [".###.", "#...#", "#....", "#.###", "#...#", "#...#", ".####"],
-    "H": ["#...#", "#...#", "#...#", "#####", "#...#", "#...#", "#...#"],
-    "I": [".###.", "..#..", "..#..", "..#..", "..#..", "..#..", ".###."],
-    "J": ["..###", "...#.", "...#.", "...#.", "...#.", "#..#.", ".##.."],
-    "K": ["#...#", "#..#.", "#.#..", "##...", "#.#..", "#..#.", "#...#"],
-    "L": ["#....", "#....", "#....", "#....", "#....", "#....", "#####"],
-    "M": ["#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#"],
-    "N": ["#...#", "#...#", "##..#", "#.#.#", "#..##", "#...#", "#...#"],
-    "O": [".###.", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."],
-    "P": ["####.", "#...#", "#...#", "####.", "#....", "#....", "#...."],
-    "Q": [".###.", "#...#", "#...#", "#...#", "#.#.#", "#..#.", ".##.#"],
-    "R": ["####.", "#...#", "#...#", "####.", "#.#..", "#..#.", "#...#"],
-    "S": [".####", "#....", "#....", ".###.", "....#", "....#", "####."],
-    "T": ["#####", "..#..", "..#..", "..#..", "..#..", "..#..", "..#.."],
-    "U": ["#...#", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."],
-    "V": ["#...#", "#...#", "#...#", "#...#", "#...#", ".#.#.", "..#.."],
-    "W": ["#...#", "#...#", "#...#", "#.#.#", "#.#.#", "#.#.#", ".#.#."],
-    "X": ["#...#", "#...#", ".#.#.", "..#..", ".#.#.", "#...#", "#...#"],
-    "Y": ["#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.."],
-    "Z": ["#####", "....#", "...#.", "..#..", ".#...", "#....", "#####"],
-    "0": [".###.", "#...#", "#..##", "#.#.#", "##..#", "#...#", ".###."],
-    "1": ["..#..", ".##..", "..#..", "..#..", "..#..", "..#..", ".###."],
-    "2": [".###.", "#...#", "....#", "...#.", "..#..", ".#...", "#####"],
-    "3": ["####.", "....#", "....#", ".###.", "....#", "....#", "####."],
-    "4": ["...#.", "..##.", ".#.#.", "#..#.", "#####", "...#.", "...#."],
-    "5": ["#####", "#....", "####.", "....#", "....#", "#...#", ".###."],
-    "6": [".###.", "#....", "#....", "####.", "#...#", "#...#", ".###."],
-    "7": ["#####", "....#", "...#.", "..#..", ".#...", ".#...", ".#..."],
-    "8": [".###.", "#...#", "#...#", ".###.", "#...#", "#...#", ".###."],
-    "9": [".###.", "#...#", "#...#", ".####", "....#", "....#", ".###."],
-    " ": ["...", "...", "...", "...", "...", "...", "..."],
-    ".": [".", ".", ".", ".", ".", ".", "#"],
-    ",": ["..", "..", "..", "..", "..", ".#", "#."],
-    ":": [".", ".", "#", ".", ".", "#", "."],
-    "'": ["#", "#", ".", ".", ".", ".", "."],
-    "!": ["#", "#", "#", "#", "#", ".", "#"],
-    "-": ["...", "...", "...", "###", "...", "...", "..."],
-    "+": [".....", "..#..", "..#..", "#####", "..#..", "..#..", "....."],
-    "/": ["....#", "...#.", "...#.", "..#..", ".#...", ".#...", "#...."],
-    "#": [".#.#.", "#####", ".#.#.", ".#.#.", ".#.#.", "#####", ".#.#."],
-    "&": [".#...", "#.#..", "#.#..", ".#...", "#.#.#", "#..#.", ".##.#"],
-    "?": [".###.", "#...#", "...#.", "..#..", "..#..", ".....", "..#.."],
-    ">": ["#...", ".#..", "..#.", "...#", "..#.", ".#..", "#..."],
-    "<": ["...#", "..#.", ".#..", "#...", ".#..", "..#.", "...#"],
-    "*": [".....", "..#..", "#.#.#", ".###.", "#.#.#", "..#..", "....."],
-    "@": [".###.", "#...#", "#.###", "#.#.#", "#.##.", "#....", ".###."],
-    "(": ["..#", ".#.", "#..", "#..", "#..", ".#.", "..#"],
-    ")": ["#..", ".#.", "..#", "..#", "..#", ".#.", "#.."],
-    "|": ["#", "#", "#", "#", "#", "#", "#"],
+THEMES = {
+    "dark": dict(
+        text="#f4efe6", body="#c9c4bb", muted="#8b8781", faint="#5b5852",
+        line="rgba(244,239,230,0.14)", line2="rgba(244,239,230,0.28)",
+        accent="#e2763f", gold="#c9a227", green="#7cc47f",
+        plane="#16181d", plane2="#1c1f25", wire="rgba(244,239,230,0.22)", block="rgba(244,239,230,0.10)",
+        glow="#7cc47f", glow_op="0.35",
+    ),
+    "light": dict(
+        text="#141414", body="#3d3b38", muted="#6b6862", faint="#a19d96",
+        line="rgba(20,20,20,0.12)", line2="rgba(20,20,20,0.26)",
+        accent="#cf5f28", gold="#a8861a", green="#3f8f4a",
+        plane="#ffffff", plane2="#faf8f4", wire="rgba(20,20,20,0.22)", block="rgba(20,20,20,0.07)",
+        glow="#141414", glow_op="0.10",
+    ),
 }
 
 
-def text_width(text, s):
-    w = 0
-    for ch in text.upper():
-        w += (len(FONT[ch][0]) + 1) * s
-    return w - s if text else 0
-
-
-def merge_rects(cells, s, x0, y0, color):
-    """cells: set of (cx, cy). Emits one rect per horizontal run."""
-    out = []
-    rows = {}
-    for cx, cy in cells:
-        rows.setdefault(cy, []).append(cx)
-    for cy, xs in rows.items():
-        xs.sort()
-        start = prev = xs[0]
-        for x in xs[1:] + [None]:
-            if x is not None and x == prev + 1:
-                prev = x
-                continue
-            out.append(
-                f'<rect x="{x0 + start * s}" y="{y0 + cy * s}" width="{(prev - start + 1) * s}" height="{s}" fill="{color}"/>'
-            )
-            if x is not None:
-                start = prev = x
-    return "".join(out)
-
-
-def text(t, x, y, s, color, shadow=None):
-    cells = set()
-    cx = 0
-    for ch in t.upper():
-        g = FONT[ch]
-        for ry, row in enumerate(g):
-            for rx, v in enumerate(row):
-                if v == "#":
-                    cells.add((cx + rx, ry))
-        cx += len(g[0]) + 1
-    out = ""
-    if shadow:
-        out += merge_rects(cells, s, x + s, y + s, shadow)
-    out += merge_rects(cells, s, x, y, color)
-    return out
-
-
-def sprite(grid, x, y, s, pal=None):
-    pal = pal or C
-    by_color = {}
-    for ry, row in enumerate(grid):
-        for rx, v in enumerate(row):
-            if v != ".":
-                by_color.setdefault(pal[v], set()).add((rx, ry))
-    return "".join(merge_rects(cells, s, x, y, col) for col, cells in by_color.items())
-
-
-def rect(x, y, w, h, fill, extra=""):
-    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"{extra}/>'
-
-
-def save(name, content):
-    os.makedirs(OUT, exist_ok=True)
-    with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
-        f.write(content)
-    print(f"  {name:22s} {len(content) // 1024} KB")
-
-
-# =====================================================================
-# Smooth layer: rounded shapes and real text, with pixel art as accents.
-# =====================================================================
-SANS = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
-INK = "#2b2118"
-BODY = "#5a4a3a"
-MUTED = "#8a7a68"
-CARD = "#fffdf8"
-LINE = "#e8dfcc"
-CREAM = "#fbf6ec"
-
-ACCENTS = {
-    "green": ("#4e7a3a", "#e4eeda"),
-    "navy": ("#3b4a6b", "#e2e6ef"),
-    "clay": ("#b5653e", "#f5e3d8"),
-    "brick": ("#a3483a", "#f3deda"),
-    "teal": ("#2f7a73", "#dcefec"),
-    "gold": ("#a87a1f", "#f6ebcf"),
-}
-
-
+# ---------------------------------------------------------------- helpers
 def esc(t):
     return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def stext(t, x, y, size, color, weight=400, anchor="start", spacing=0):
-    extra = f' letter-spacing="{spacing}"' if spacing else ""
+def t(s, x, y, size, fill, weight=400, font=SANS, anchor="start", ls=0, extra=""):
+    a = f' letter-spacing="{ls}"' if ls else ""
     return (
-        f'<text x="{x}" y="{y}" font-family="{SANS}" font-size="{size}" font-weight="{weight}" '
-        f'fill="{color}" text-anchor="{anchor}"{extra}>{esc(t)}</text>'
+        f'<text x="{x}" y="{y}" font-family="{font}" font-size="{size}" font-weight="{weight}" '
+        f'fill="{fill}" text-anchor="{anchor}"{a}{extra}>{esc(s)}</text>'
     )
 
 
-def est_width(t, size, weight=400):
-    """Rough width of sans text, good enough for sizing pills."""
-    per = 0.55 if weight < 600 else 0.6
-    return len(t) * size * per
+def mono(s, x, y, fill, size=12, anchor="start", weight=500, extra=""):
+    return t(s.upper(), x, y, size, fill, weight, MONO, anchor, 1.2, extra)
 
 
-def pix(inner):
-    return f'<g shape-rendering="crispEdges">{inner}</g>'
-
-
-def ssvg(w, h, body, style="", title="", defs=""):
-    return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
-        f'role="img" aria-label="{esc(title)}"><title>{esc(title)}</title>'
-        f"<defs>{defs}</defs><style>{style}</style>{body}</svg>"
-    )
-
-
-SHADOW = (
-    '<filter id="sh" x="-10%" y="-10%" width="120%" height="140%">'
-    '<feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#2b2118" flood-opacity="0.12"/></filter>'
-)
-
-
-def wrap(t, n):
-    words, lines, cur = t.split(), [], ""
+def wrap(s, n):
+    words, lines, cur = s.split(), [], ""
     for w in words:
         if len(cur) + len(w) + (1 if cur else 0) > n:
             lines.append(cur)
@@ -230,339 +64,386 @@ def wrap(t, n):
     return lines
 
 
-# ---------------------------------------------------------------- pixel accents
-SPARKLE = ["...d...", "...d...", "..ddd..", "ddddddd", "..ddd..", "...d...", "...d..."]
-CLOUD = [
-    "......wwww..........",
-    "....wwwwwwww..www...",
-    "..wwwwwwwwwwwwwwwww.",
-    ".wwwwwwwwwwwwwwwwwww",
-    "wwwwwwwwwwwwwwwwwwww",
-    ".sssssssssssssssss..",
-]
-CURSOR = [
-    "a.........",
-    "aa........",
-    "aca.......",
-    "acca......",
-    "accca.....",
-    "acccca....",
-    "accccca...",
-    "acccccca..",
-    "accccaaaa.",
-    "acaaca....",
-    "aa..aca...",
-    "a....aca..",
-    ".....aa...",
-]
-PIN = ["..lll..", ".lllll.", "lll.lll", "lll.lll", ".lllll.", "..lll..", "...l..."]
-PENCIL = [
-    "........aa..",
-    ".......alla.",
-    "......adala.",
-    ".....adda...",
-    "....adda....",
-    "...adda.....",
-    "..adda......",
-    ".affa.......",
-    ".aaa........",
-    "aa..........",
-]
-ICONS = {
-    "sprout": [
-        "............",
-        ".......jj...",
-        "......jiij..",
-        "..jj..jiij..",
-        ".jiij.jjj...",
-        ".jiiij.j....",
-        "..jjjjjj....",
-        "......j.....",
-        "..aaaaaaaa..",
-        "..ahhhhhha..",
-        "...ahhhha...",
-        "...aaaaaa...",
-    ],
-    "gamepad": [
-        "............",
-        "............",
-        "..aaaaaaaa..",
-        ".annnnnnnna.",
-        "annannnnlnna",
-        "anaaanndnlna",
-        "annannnnlnna",
-        "annnnnnnnnna",
-        "annnaaaannna",
-        ".aaa....aaa.",
-        "............",
-        "............",
-    ],
-    "monitor": [
-        "............",
-        "aaaaaaaaaaaa",
-        "annnnnnnnnna",
-        "ankkknnndnna",
-        "anknnnnnnnna",
-        "annnnniinnna",
-        "annnniiiinna",
-        "aaaaaaaaaaaa",
-        ".....aa.....",
-        "....abba....",
-        "..aaaaaaaa..",
-        "............",
-    ],
-    "film": [
-        "............",
-        "aaaaaaaaaaaa",
-        "acaacaacaaca",
-        "aaaaaaaaaaaa",
-        "allllllllll.",
-        "allllllllll.",
-        "alllllddllla",
-        "allllllllll.",
-        "allllllllll.",
-        "aaaaaaaaaaaa",
-        "acaacaacaaca",
-        "aaaaaaaaaaaa",
-    ],
-    "wifi": [
-        "............",
-        "...jjjjjj...",
-        ".jj......jj.",
-        "j...jjjj...j",
-        "...j....j...",
-        "..j..jj..j..",
-        ".....jj.....",
-        "............",
-        ".....jj.....",
-        ".....jj..l.l",
-        ".........ll.",
-        ".........l.l",
-    ],
-    "coin": [
-        "...aaaaaa...",
-        ".aaddddddaa.",
-        ".adddddddda.",
-        "adaaaaaadgda",
-        "addaddddagda",
-        "adaaaaaadgda",
-        "addaddddddga",
-        "addaddddddga",
-        ".adddddddga.",
-        ".aaddddggaa.",
-        "...aaaaaa...",
-        "............",
-    ],
-}
+def svg(w, h, body, style="", title="", defs=""):
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+        f'fill="none" role="img" aria-label="{esc(title)}"><title>{esc(title)}</title>'
+        f"<defs>{defs}</defs><style>{style}</style>{body}</svg>"
+    )
+
+
+def save(name, theme, content):
+    os.makedirs(OUT, exist_ok=True)
+    fn = f"{name}-{theme}.svg"
+    with open(os.path.join(OUT, fn), "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"  {fn:28s} {len(content) // 1024} KB")
+
+
+FADE_UP = (
+    f".fu{{animation:fu 1.2s {EASE} both}}"
+    "@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}"
+)
+
+ISO = "matrix(0.866,0.5,-0.866,0.5,{x},{y})"  # flat plane, isometric
 
 
 # ---------------------------------------------------------------- hero
-def hero():
-    W, H = 1000, 360
-    defs = (
-        '<clipPath id="r"><rect width="1000" height="360" rx="24"/></clipPath>'
-        '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">'
-        '<stop offset="0" stop-color="#fbf6ec"/><stop offset="1" stop-color="#e9f1dc"/></linearGradient>'
-        '<radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">'
-        '<stop offset="0" stop-color="#f3d48a" stop-opacity="0.55"/>'
-        '<stop offset="1" stop-color="#f3d48a" stop-opacity="0"/></radialGradient>'
-        + SHADOW
+def layer_content(kind, c, pw, ph):
+    """Contents of one wireframe layer, in flat plane coordinates."""
+    s = ""
+    if kind == "sketch":
+        s += f'<rect x="0" y="0" width="{pw}" height="{ph}" rx="12" fill="{c["plane"]}" fill-opacity="0.55" stroke="{c["wire"]}" stroke-dasharray="5 6"/>'
+        for i, (y, w) in enumerate([(30, 150), (52, 110), (100, 200), (122, 170), (144, 130)]):
+            s += f'<path d="M20 {y} q {w / 4} -4 {w / 2} 0 t {w / 2} 0" stroke="{c["faint"]}" stroke-width="2" stroke-linecap="round"/>'
+        s += mono("01 sketch", 18, ph - 14, c["muted"], 11)
+    elif kind == "wire":
+        s += f'<rect x="0" y="0" width="{pw}" height="{ph}" rx="12" fill="{c["plane"]}" fill-opacity="0.8" stroke="{c["wire"]}"/>'
+        s += f'<rect x="16" y="16" width="{pw - 32}" height="18" rx="4" stroke="{c["wire"]}"/>'
+        s += f'<rect x="16" y="44" width="110" height="76" rx="6" stroke="{c["wire"]}"/>'
+        s += f'<path d="M16 44 L126 120 M126 44 L16 120" stroke="{c["wire"]}"/>'
+        for i in range(3):
+            s += f'<rect x="140" y="{48 + i * 18}" width="{100 - i * 22}" height="8" rx="4" fill="{c["block"]}"/>'
+        s += f'<rect x="140" y="104" width="70" height="16" rx="8" stroke="{c["wire"]}"/>'
+        s += mono("02 wireframe", 18, ph - 14, c["muted"], 11)
+    elif kind == "design":
+        s += f'<rect x="0" y="0" width="{pw}" height="{ph}" rx="12" fill="{c["plane2"]}" stroke="{c["line2"]}"/>'
+        for i, col in enumerate([c["text"], c["accent"], c["body"], c["gold"]]):
+            s += f'<circle cx="{30 + i * 26}" cy="32" r="9" fill="{col}"/>'
+        s += t("Aa", pw - 70, 44, 30, c["text"], 700)
+        s += f'<rect x="16" y="64" width="{pw - 32}" height="1" fill="{c["line2"]}"/>'
+        s += t("Display 64/600", 18, 92, 13, c["body"], 600)
+        s += t("Body 16/400", 18, 112, 12, c["muted"])
+        s += mono("03 design", 18, ph - 14, c["muted"], 11)
+    else:  # build
+        s += f'<rect x="0" y="0" width="{pw}" height="{ph}" rx="12" fill="{c["plane2"]}" stroke="{c["line2"]}"/>'
+        s += f'<rect x="16" y="16" width="{pw - 32}" height="22" rx="6" fill="{c["block"]}"/>'
+        s += f'<circle cx="30" cy="27" r="5" fill="{c["accent"]}"/>'
+        s += f'<rect x="16" y="50" width="{pw - 32}" height="66" rx="10" fill="{c["block"]}"/>'
+        s += f'<rect x="30" y="64" width="90" height="9" rx="4.5" fill="{c["text"]}" fill-opacity="0.8"/>'
+        s += f'<rect x="30" y="80" width="{pw - 92}" height="6" rx="3" fill="{c["block"]}"/>'
+        s += f'<rect class="bar" x="30" y="80" width="{pw - 92}" height="6" rx="3" fill="{c["green"]}"/>'
+        s += f'<rect x="30" y="94" width="60" height="14" rx="7" fill="{c["accent"]}"/>'
+        s += mono("04 build & ship", 18, ph - 14, c["muted"], 11)
+    return s
+
+
+def hero(theme):
+    c = THEMES[theme]
+    W, H = 1000, 460
+    b = ""
+    # Left: name block.
+    x = 4
+    b += f'<g class="fu" style="animation-delay:.1s">{mono("Davao City, Philippines", x, 70, c["accent"], 13)}</g>'
+    b += f'<g class="fu" style="animation-delay:.2s">{t("NICHO", x, 162, 96, c["text"], 800, ls=-3)}</g>'
+    b += (
+        f'<g class="fu" style="animation-delay:.3s">'
+        f'<text x="{x}" y="258" font-family="{SANS}" font-size="96" font-weight="800" letter-spacing="-3" '
+        f'fill="none" stroke="{c["text"]}" stroke-width="1.6">LESCANO</text></g>'
     )
-    b = '<g clip-path="url(#r)">'
-    b += rect(0, 0, W, H, "url(#sky)")
-    b += '<circle cx="800" cy="120" r="220" fill="url(#sun)"/>'
-    for cy, s, dur, delay in [(36, 4, 90, -20), (110, 3, 120, -70), (60, 3, 140, -110)]:
+    lines = [
+        ("UI/UX designer and developer, also into", c["text"]),
+        ("machine learning and AI automation.", c["text"]),
+        ("I draw every project first, then build it,", c["muted"]),
+        ("layer by layer.", c["muted"]),
+    ]
+    for i, (s, col) in enumerate(lines):
+        b += f'<g class="fu" style="animation-delay:{.45 + i * .06:.2f}s">{t(s, x, 310 + i * 26, 18, col, 500)}</g>'
+    # Meta row.
+    b += f'<rect x="{x}" y="412" width="470" height="1" fill="{c["line"]}"/>'
+    for i, (k, v) in enumerate([("Builds", "Web · Mobile · Desktop"), ("Designs in", "Figma"), ("Studying", "BS IT, UM")]):
+        cx = x + (0, 210, 330)[i]
+        b += f'<g class="fu" style="animation-delay:{.8 + i * .08:.2f}s">{mono(k, cx, 436, c["accent"], 10.5)}{mono(v, cx, 454, c["text"], 10.5, weight=600)}</g>'
+
+    # Right: the stack of wireframe layers.
+    pw, ph = 260, 180
+    ox = 560 + ph * 0.866 + 10
+    oy = 70
+    gap = 52
+    kinds = ["sketch", "wire", "design", "build"]
+    for i, kind in enumerate(kinds):  # bottom first
+        y = oy + (3 - i) * gap
+        filt = ' filter="url(#glow)"' if kind == "build" else ""
         b += (
-            f'<g class="cloud" style="animation-duration:{dur}s;animation-delay:{delay}s" opacity="0.9">'
-            f"{pix(sprite(CLOUD, 0, cy, s))}</g>"
+            f'<g class="L{i}"><g transform="{ISO.format(x=round(ox, 1), y=y)}"{filt}>'
+            f"{layer_content(kind, c, pw, ph)}</g></g>"
         )
-    b += '<path d="M0 290 C 160 250, 300 270, 460 285 S 760 250, 1000 275 V 360 H 0 Z" fill="#d3e4bf"/>'
-    b += '<path d="M0 318 C 200 296, 380 322, 560 312 S 860 296, 1000 312 V 360 H 0 Z" fill="#b2cf98"/>'
-    b += '<path d="M0 342 C 260 332, 520 348, 1000 336 V 360 H 0 Z" fill="#8db577"/>'
-    b += "</g>"
-
-    # Left: intro.
-    x = 64
-    label = "UI/UX DESIGNER  ·  DEVELOPER"
-    lw = est_width(label, 12, 700) + 36
-    b += f'<rect x="{x}" y="56" width="{lw:.0f}" height="30" rx="15" fill="#4e7a3a" fill-opacity="0.12"/>'
-    b += stext(label, x + 18, 76, 12, "#3f6b2e", 700, spacing=1.6)
-    b += pix(text("NICHO LESCANO", x, 110, 7, INK, shadow="#cfe2bb"))
-    b += stext("I design calm, clear and playful interfaces,", x, 200, 21, BODY, 500)
-    b += stext("then build them for mobile, desktop and the web.", x, 230, 21, BODY, 500)
-    b += pix(sprite(PIN, x, 263, 2, {"l": "#b5653e"}))
-    b += stext("Based in the Philippines", x + 22, 276, 15, MUTED, 500)
-
-    # Right: a design-tool window with a frame being edited.
-    wx, wy, ww, wh = 630, 52, 316, 236
-    b += (
-        f'<g filter="url(#sh)"><rect x="{wx}" y="{wy}" width="{ww}" height="{wh}" rx="14" '
-        f'fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/></g>'
+    defs = (
+        '<filter id="glow" x="-30%" y="-30%" width="160%" height="160%">'
+        f'<feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="{c["glow"]}" flood-opacity="{c["glow_op"]}"/></filter>'
     )
-    b += (
-        f'<path d="M{wx} {wy + 14} a14 14 0 0 1 14 -14 H{wx + ww - 14} a14 14 0 0 1 14 14 '
-        f'V{wy + 34} H{wx} Z" fill="#f4eee2"/>'
+    # Layers breathe apart and back together.
+    style = FADE_UP
+    for i, d in enumerate([18, 6, -6, -18]):
+        style += (
+            f".L{i}{{animation:l{i} 7s {EASE_IO} infinite}}"
+            f"@keyframes l{i}{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY({d}px)}}}}"
+        )
+    style += (
+        f".bar{{transform-box:fill-box;transform-origin:left;animation:bar 7s {EASE_IO} infinite}}"
+        "@keyframes bar{0%{transform:scaleX(.08)}60%,100%{transform:scaleX(1)}}"
     )
-    b += f'<line x1="{wx}" y1="{wy + 34}" x2="{wx + ww}" y2="{wy + 34}" stroke="{LINE}" stroke-width="1.5"/>'
-    for i, col in enumerate(["#e58f7d", "#e9c46a", "#8db577"]):
-        b += f'<circle cx="{wx + 20 + i * 16}" cy="{wy + 17}" r="5" fill="{col}"/>'
-    b += stext("home-screen", wx + ww / 2, wy + 22, 12, MUTED, 600, anchor="middle")
-    # Mock app card inside the window.
-    cx, cy = wx + 24, wy + 52
-    b += f'<rect x="{cx}" y="{cy}" width="190" height="166" rx="12" fill="#ffffff" stroke="{LINE}" stroke-width="1.5"/>'
-    b += f'<rect x="{cx + 12}" y="{cy + 12}" width="166" height="62" rx="8" fill="#e4eeda"/>'
-    b += pix(
-        rect(cx + 12, cy + 56, 166, 18, "#b2cf98")
-        + rect(cx + 30, cy + 50, 50, 6, "#b2cf98")
-        + rect(cx + 100, cy + 46, 46, 10, "#b2cf98")
-        + sprite(SPARKLE, cx + 140, cy + 20, 2)
-    )
-    b += f'<rect x="{cx + 12}" y="{cy + 86}" width="120" height="9" rx="4.5" fill="#d9cfbc"/>'
-    b += f'<rect x="{cx + 12}" y="{cy + 102}" width="86" height="9" rx="4.5" fill="#ebe3d3"/>'
-    bx, by, bw, bh = cx + 12, cy + 124, 96, 26
-    b += f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="13" fill="#e2b04a"/>'
-    b += stext("Get started", bx + bw / 2, by + 17, 11, INK, 700, anchor="middle")
-    sel = "#4c8bf5"
-    b += f'<g class="sel"><rect x="{bx - 5}" y="{by - 5}" width="{bw + 10}" height="{bh + 10}" fill="none" stroke="{sel}" stroke-width="1.5"/>'
-    for hx, hy in [(bx - 5, by - 5), (bx + bw + 5, by - 5), (bx - 5, by + bh + 5), (bx + bw + 5, by + bh + 5)]:
-        b += f'<rect x="{hx - 3.5}" y="{hy - 3.5}" width="7" height="7" fill="#fff" stroke="{sel}" stroke-width="1.5"/>'
-    b += "</g>"
-    b += f'<rect x="{bx + bw + 14}" y="{by + 4}" width="52" height="18" rx="4" fill="{sel}"/>'
-    b += stext("96 × 26", bx + bw + 40, by + 17, 10, "#ffffff", 600, anchor="middle")
-    # Side panel: colour styles.
-    px = wx + 236
-    b += stext("Colors", px, wy + 64, 11, MUTED, 600)
-    for i, col in enumerate(["#2b2118", "#4e7a3a", "#8db577", "#e2b04a", "#b5653e"]):
-        b += f'<rect x="{px}" y="{wy + 76 + i * 28}" width="56" height="20" rx="6" fill="{col}"/>'
-    # Pixel cursor and sparkles.
-    b += f'<g class="cur">{pix(sprite(CURSOR, bx + bw + 2, by + bh + 2, 2, {"a": INK, "c": "#ffffff"}))}</g>'
-    for i, (sx, sy) in enumerate([(590, 70), (580, 236), (960, 318), (530, 36)]):
-        b += f'<g class="tw" style="animation-delay:{i * 0.8}s">{pix(sprite(SPARKLE, sx, sy, 2))}</g>'
+    save("hero", theme, svg(W, H, b, style, "Nicho Lescano. UI/UX designer and developer, also into machine learning and AI automation. Based in Davao City, Philippines.", defs))
 
+
+# ---------------------------------------------------------------- section label
+def label(name, num, title, right, theme):
+    c = THEMES[theme]
+    W, H = 1000, 40
+    b = mono(num, 0, 24, c["accent"], 13, weight=600)
+    b += mono(title, 34, 24, c["text"], 13, weight=600)
+    tw = 34 + len(title) * 9.4 + 18
+    rw = len(right) * 8.6 + 18
+    b += f'<rect class="ln" x="{tw:.0f}" y="19" width="{W - tw - rw:.0f}" height="1" fill="{c["line2"]}"/>'
+    b += mono(right, W, 24, c["muted"], 11.5, anchor="end")
+    style = f".ln{{transform-box:fill-box;transform-origin:left;animation:ln 1.6s {EASE} both .2s}}@keyframes ln{{from{{transform:scaleX(0)}}}}"
+    save(name, theme, svg(W, H, b, style, f"{num} {title}"))
+
+
+# ---------------------------------------------------------------- project rows
+def art_kuwago(c, x0, y0):
+    s = ""
+    for i in range(3):
+        px, py = x0 + i * 112, y0 + (0, -12, 6)[i]
+        s += f'<rect x="{px}" y="{py}" width="92" height="184" rx="16" stroke="{c["line2"]}" fill="{c["plane"]}" fill-opacity="0.35"/>'
+        s += f'<rect x="{px + 34}" y="{py + 8}" width="24" height="5" rx="2.5" fill="{c["block"]}"/>'
+    # phone 1: focus timer ring
+    cx, cy = x0 + 46, y0 + 78
+    s += f'<circle cx="{cx}" cy="{cy}" r="28" stroke="{c["block"]}" stroke-width="5"/>'
+    s += (
+        f'<circle class="ring" cx="{cx}" cy="{cy}" r="28" stroke="{c["accent"]}" stroke-width="5" '
+        f'stroke-linecap="round" stroke-dasharray="176" transform="rotate(-90 {cx} {cy})"/>'
+    )
+    s += t("25:00", cx, cy + 5, 13, c["text"], 700, anchor="middle")
+    s += f'<rect x="{x0 + 18}" y="{y0 + 130}" width="56" height="16" rx="8" fill="{c["accent"]}"/>'
+    # phone 2: a sprout growing
+    gx, gy = x0 + 158, y0 + 140
+    s += f'<rect x="{gx - 22}" y="{gy}" width="44" height="18" rx="5" fill="{c["block"]}"/>'
+    s += f'<path class="stem" d="M{gx} {gy} C {gx} {gy - 30}, {gx - 4} {gy - 50}, {gx} {gy - 70}" stroke="{c["green"]}" stroke-width="3" stroke-linecap="round" pathLength="1" stroke-dasharray="1"/>'
+    s += f'<path class="leaf l1" d="M{gx} {gy - 40} c -18 -4 -26 -16 -24 -26 c 14 2 22 12 24 26 z" fill="{c["green"]}"/>'
+    s += f'<path class="leaf l2" d="M{gx} {gy - 58} c 18 -4 26 -16 24 -26 c -14 2 -22 12 -24 26 z" fill="{c["green"]}"/>'
+    # phone 3: quiz card
+    qx, qy = x0 + 236, y0 + 40
+    s += f'<rect x="{qx}" y="{qy}" width="68" height="56" rx="8" fill="{c["block"]}"/>'
+    for i in range(3):
+        s += f'<rect x="{qx}" y="{qy + 66 + i * 20}" width="68" height="14" rx="7" stroke="{c["wire"]}"/>'
+    s += f'<rect class="pick" x="{qx}" y="{qy + 86}" width="68" height="14" rx="7" fill="{c["green"]}"/>'
     style = (
-        ".cloud{animation:drift 100s linear infinite}"
-        "@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(1000px)}}"
-        ".tw{animation:tw 3s ease-in-out infinite}"
-        "@keyframes tw{0%,100%{opacity:.2}50%{opacity:1}}"
-        ".cur{animation:cur 4s ease-in-out infinite}"
-        "@keyframes cur{0%,100%{transform:translate(0,0)}50%{transform:translate(-6px,-4px)}}"
-        ".sel{animation:sel 4s ease-in-out infinite}"
-        "@keyframes sel{0%,100%{opacity:1}50%{opacity:.55}}"
+        f".ring{{animation:ring 6s {EASE_IO} infinite}}@keyframes ring{{0%{{stroke-dashoffset:176}}70%,100%{{stroke-dashoffset:0}}}}"
+        f".stem{{animation:stem 6s {EASE} infinite}}@keyframes stem{{0%{{stroke-dashoffset:1}}45%,100%{{stroke-dashoffset:0}}}}"
+        f".leaf{{transform-box:fill-box;animation:leaf 6s {EASE} infinite}}.l1{{transform-origin:right bottom}}.l2{{transform-origin:left bottom;animation-delay:.3s}}"
+        "@keyframes leaf{0%,25%{transform:scale(0)}55%,100%{transform:scale(1)}}"
+        f".pick{{animation:pick 6s {EASE} infinite}}@keyframes pick{{0%,40%{{opacity:0}}55%,100%{{opacity:.9}}}}"
     )
-    save("hero.svg", ssvg(W, H, b, style, "Nicho Lescano, UI/UX designer and developer, based in the Philippines", defs))
+    return s, style
 
 
-# ---------------------------------------------------------------- buttons
-def pill_button(name, label, fill, fg, stroke=None):
-    size = 15
-    tw = est_width(label, size, 700)
-    W, H = int(tw + 70), 48
-    st = f' stroke="{stroke}" stroke-width="1.5"' if stroke else ""
-    b = f'<g filter="url(#sh)"><rect x="6" y="3" width="{W - 12}" height="36" rx="18" fill="{fill}"{st}/></g>'
-    b += stext(label, 26, 26, size, fg, 700)
-    ax = W - 34
-    b += (
-        f'<path d="M{ax} 21 h10 m-4 -4 l4 4 l-4 4" stroke="{fg}" stroke-width="2" fill="none" '
-        f'stroke-linecap="round" stroke-linejoin="round"/>'
+def art_cinema(c, x0, y0):
+    s = ""
+    w, h = 330, 180
+    s += f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="12" stroke="{c["line2"]}" fill="{c["plane"]}" fill-opacity="0.35"/>'
+    s += f'<path d="M{x0} {y0 + 24} H{x0 + w}" stroke="{c["line"]}"/>'
+    for i in range(3):
+        s += f'<circle cx="{x0 + 16 + i * 12}" cy="{y0 + 12}" r="3.5" fill="{c["block"]}"/>'
+    s += f'<path d="M{x0 + 80} {y0 + 50} Q {x0 + w / 2} {y0 + 36} {x0 + w - 80} {y0 + 50}" stroke="{c["muted"]}" stroke-width="2" stroke-linecap="round"/>'
+    s += mono("screen", x0 + w / 2, y0 + 66, c["faint"], 9, anchor="middle")
+    picks = {(2, 4): 0, (2, 5): 1, (2, 6): 2}
+    for r in range(5):
+        for col in range(11):
+            if col == 5 and False:
+                continue
+            cx = x0 + 45 + col * 22 + (6 if col > 4 else 0)
+            cy = y0 + 84 + r * 16
+            s += f'<rect x="{cx}" y="{cy}" width="14" height="10" rx="3" fill="{c["block"]}"/>'
+            if (r, col) in picks:
+                s += f'<rect class="seat" style="animation-delay:{picks[(r, col)] * .35:.2f}s" x="{cx}" y="{cy}" width="14" height="10" rx="3" fill="{c["accent"]}"/>'
+    s += f'<rect x="{x0 + w - 104}" y="{y0 + h + 14}" width="104" height="26" rx="13" fill="{c["text"]}"/>'
+    s += t("Book seats", x0 + w - 52, y0 + h + 31, 12, c["plane"] if c is THEMES["dark"] else "#ffffff", 700, anchor="middle")
+    style = (
+        f".seat{{animation:seat 5s {EASE} infinite both}}"
+        "@keyframes seat{0%,15%{opacity:0;transform:translateY(-3px)}30%,85%{opacity:1;transform:none}100%{opacity:0}}"
     )
-    save(name, ssvg(W, H, b, "", label, SHADOW))
+    return s, style
 
 
-# ---------------------------------------------------------------- section heading
-def heading(name, label):
-    s = 3
-    tw = text_width(label, s)
-    W, H = tw + 96, 56
-    b = f'<rect x="1" y="5" width="{W - 2}" height="46" rx="23" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
-    b += pix(sprite(SPARKLE, 24, 18, 3) + text(label, 62, 18, s, INK))
-    save(name, ssvg(W, H, b, "", label.title()))
-
-
-# ---------------------------------------------------------------- about
-def about():
-    W, H = 1000, 320
-    b = (
-        f'<g filter="url(#sh)"><rect x="8" y="4" width="{W - 16}" height="{H - 20}" rx="20" '
-        f'fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/></g>'
+def art_xpera(c, x0, y0):
+    s = ""
+    w, h = 330, 200
+    s += f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="12" stroke="{c["line2"]}" fill="{c["plane"]}" fill-opacity="0.35"/>'
+    s += f'<path d="M{x0 + 52} {y0} V{y0 + h}" stroke="{c["line"]}"/>'
+    for i in range(4):
+        s += f'<rect x="{x0 + 16}" y="{y0 + 20 + i * 30}" width="20" height="20" rx="6" fill="{c["accent"] if i == 1 else c["block"]}"/>'
+    for i, k in enumerate(["Customers", "Sales", "Inquiries"]):
+        kx = x0 + 68 + i * 86
+        s += f'<rect x="{kx}" y="{y0 + 16}" width="76" height="46" rx="8" fill="{c["block"]}"/>'
+        s += t(k, kx + 10, y0 + 33, 9.5, c["muted"], 500)
+        s += f'<rect x="{kx + 10}" y="{y0 + 42}" width="{(40, 30, 22)[i]}" height="8" rx="4" fill="{c["text"]}" fill-opacity="0.7"/>'
+    base = y0 + h - 22
+    heights = [40, 62, 48, 86, 70, 104, 92]
+    for i, hh in enumerate(heights):
+        bx = x0 + 72 + i * 34
+        col = c["accent"] if i == 5 else c["wire"]
+        s += f'<rect class="bar" style="animation-delay:{i * .08:.2f}s" x="{bx}" y="{base - hh}" width="20" height="{hh}" rx="4" fill="{col}"/>'
+    s += f'<path d="M{x0 + 66} {base} H{x0 + w - 16}" stroke="{c["line2"]}"/>'
+    style = (
+        f".bar{{transform-box:fill-box;transform-origin:bottom;animation:grow 6s {EASE} infinite both}}"
+        "@keyframes grow{0%{transform:scaleY(.05)}25%,85%{transform:scaleY(1)}100%{transform:scaleY(.05)}}"
     )
-    x = 52
-    b += stext("ABOUT ME", x, 58, 12, "#4e7a3a", 700, spacing=1.6)
-    b += stext("Designer first, developer second.", x, 96, 27, INK, 700)
-    para = [
-        "I'm an IT student from the Philippines who likes",
-        "turning ideas into interfaces that feel calm, clear",
-        "and a little playful. I take projects from the first",
-        "Figma frame all the way to a working app.",
+    return s, style
+
+
+PROJECTS = [
+    dict(
+        file="work-kuwago", fig="Fig. 01 / Mobile app", name="kuwaGO",
+        desc="A cozy study garden. Finish a focus session and your plant grows; give up and it wilts. AI turns your own notes into quizzes.",
+        stack="Flutter · Firebase · Gemini · Cloudflare Workers",
+        proof=[("30", "days to ship"), ("18", "testers"), ("72", "tests")],
+        art=art_kuwago,
+    ),
+    dict(
+        file="work-cinematheque", fig="Fig. 02 / Web system", name="Cinematheque",
+        desc="Ticketing for a real cinema. Moviegoers pick exact seats, pay online and get an e-ticket; staff run schedules and reports.",
+        stack="Laravel 12 · MySQL · PayMongo · Blade",
+        proof=[("129", "tests"), ("3", "person team"), ("1", "real client")],
+        art=art_cinema,
+    ),
+    dict(
+        file="work-xpera", fig="Fig. 03 / Desktop system", name="xpera CRM",
+        desc="A customer system for small stores that sell gaming PC parts: who each customer is, what they buy, owe and need.",
+        stack="C# · .NET WinForms · SQL Server · EF Core",
+        proof=[("15", "use cases"), ("4", "user roles"), ("1", "database per store")],
+        art=art_xpera,
+    ),
+]
+
+
+def work(p, theme):
+    c = THEMES[theme]
+    W, H = 1000, 290
+    b = ""
+    b += f'<g class="fu">{mono(p["fig"], 0, 40, c["accent"], 12)}</g>'
+    b += f'<g class="fu" style="animation-delay:.08s">{t(p["name"], -2, 92, 46, c["text"], 800, ls=-1.5)}</g>'
+    for i, line in enumerate(wrap(p["desc"], 52)[:3]):
+        b += f'<g class="fu" style="animation-delay:{.16 + i * .05:.2f}s">{t(line, 0, 128 + i * 25, 16.5, c["body"])}</g>'
+    b += f'<g class="fu" style="animation-delay:.32s">{mono(p["stack"], 0, 214, c["muted"], 11)}</g>'
+    x = 0
+    for n, lab in p["proof"]:
+        b += t(n, x, 256, 24, c["text"], 700)
+        nw = len(n) * 14 + 8
+        b += mono(lab, x + nw, 255, c["muted"], 10.5)
+        x += nw + len(lab) * 8.2 + 30
+    art, astyle = p["art"](c, 620, 44)
+    b += f'<g class="fu" style="animation-delay:.2s">{art}</g>'
+    b += f'<rect x="0" y="{H - 1}" width="{W}" height="1" fill="{c["line"]}"/>'
+    save(p["file"], theme, svg(W, H, b, FADE_UP + astyle, f'{p["name"]}: {p["desc"]}'))
+
+
+# ---------------------------------------------------------------- process
+def process(theme):
+    c = THEMES[theme]
+    W, H = 1000, 190
+    steps = [
+        ("Brief", "What it's for,", "and who uses it."),
+        ("Sketch", "Rough lines,", "cheap to change."),
+        ("Wireframe", "Boxes, hierarchy", "and flow."),
+        ("Design", "Decided before", "the code."),
+        ("Build & ship", "Built, tested,", "shipped."),
     ]
-    for i, line in enumerate(para):
-        b += stext(line, x, 138 + i * 27, 17, BODY)
-    b += pix(sprite(SPARKLE, x, 256, 2))
-    b += stext("Always learning, always sketching", x + 24, 268, 15, MUTED, 600)
+    step = 212
+    y = 40
+    b = f'<rect x="8" y="{y - 0.5}" width="{step * 4}" height="1" fill="{c["line2"]}"/>'
+    b += f'<rect class="prog" x="8" y="{y - 1}" width="{step * 4}" height="2" fill="{c["accent"]}"/>'
+    total = 8.0
+    style = (
+        f".prog{{transform-box:fill-box;transform-origin:left;animation:prog {total}s {EASE_IO} infinite}}"
+        "@keyframes prog{0%{transform:scaleX(0)}70%,92%{transform:scaleX(1)}100%{transform:scaleX(1);opacity:0}}"
+    )
+    for i, (name, l1, l2) in enumerate(steps):
+        x = 8 + i * step
+        at = i / 4 * 70  # percent of the loop when the line reaches this dot
+        b += f'<circle cx="{x}" cy="{y}" r="7" fill="{c["plane"]}" stroke="{c["line2"]}" stroke-width="1.5"/>'
+        b += f'<circle class="d{i}" cx="{x}" cy="{y}" r="7" fill="{c["accent"]}"/>'
+        style += (
+            f".d{i}{{transform-box:fill-box;transform-origin:center;animation:d{i} {total}s {EASE} infinite}}"
+            f"@keyframes d{i}{{0%,{max(at - 0.1, 0):.1f}%{{transform:scale(0)}}{at + 4:.1f}%,92%{{transform:scale(1)}}100%{{transform:scale(0)}}}}"
+        )
+        tx = x - 8
+        b += mono(f"0{i + 1}", tx, y + 44, c["accent"], 11.5, weight=600)
+        b += t(name, tx, y + 74, 21, c["text"], 700, ls=-0.4)
+        b += t(l1, tx, y + 102, 14.5, c["muted"])
+        b += t(l2, tx, y + 122, 14.5, c["muted"])
+    save("process", theme, svg(W, H, b, style, "How I work: brief, sketch, wireframe, design, build and ship"))
 
+
+# ---------------------------------------------------------------- numbers
+def numbers(theme):
+    c = THEMES[theme]
+    W, H = 1000, 150
+    items = [
+        ("3", "systems shipped", "mobile, web, desktop"),
+        ("201", "automated tests", "across two projects"),
+        ("18", "real testers", "on kuwaGO"),
+        ("30", "days to ship", "kuwaGO, idea to release"),
+    ]
+    b = ""
+    style = FADE_UP + (
+        f".ul{{transform-box:fill-box;transform-origin:left;animation:ul 1.8s {EASE} both}}"
+        "@keyframes ul{from{transform:scaleX(0)}}"
+    )
+    for i, (n, l1, l2) in enumerate(items):
+        x = i * 250
+        d = 0.15 + i * 0.12
+        b += f'<g class="fu" style="animation-delay:{d:.2f}s">{t(n, x - 3, 70, 68, c["text"], 800, ls=-2.5)}</g>'
+        b += f'<rect class="ul" style="animation-delay:{d + .2:.2f}s" x="{x}" y="90" width="210" height="1.5" fill="{c["accent"] if i == 1 else c["line2"]}"/>'
+        b += f'<g class="fu" style="animation-delay:{d + .1:.2f}s">{mono(l1, x, 116, c["text"], 11.5, weight=600)}{mono(l2, x, 136, c["muted"], 10.5)}</g>'
+    save("numbers", theme, svg(W, H, b, style, "3 systems shipped, 201 automated tests, 18 real testers, 30 days from idea to release"))
+
+
+# ---------------------------------------------------------------- skills
+def skills(theme):
+    c = THEMES[theme]
     rows = [
-        ("Design", "Figma, Illustrator, prototyping", "pencil", "clay"),
-        ("Build", "Flutter, .NET, Laravel, JavaScript", "code", "green"),
-        ("Exploring", "Three.js and AI features", "spark", "gold"),
+        ("Design", "Figma · UI/UX · Brand and logo · Prototyping"),
+        ("Web", "Laravel · PHP · Blade · HTML · CSS · JavaScript · REST APIs"),
+        ("Mobile", "Flutter · Dart · Firebase Auth · Firestore"),
+        ("Desktop", "C# · .NET WinForms · ASP.NET API · Java"),
+        ("Data", "MySQL · SQL Server · EF Core · Multi-tenant design"),
+        ("AI & ML", "Machine learning · AI automation · LLM APIs (Gemini)"),
+        ("Tools", "Git and GitHub · Cloudflare Workers · AI-assisted development"),
     ]
-    rx = 560
-    for i, (title, sub, icon, acc) in enumerate(rows):
-        y = 40 + i * 80
-        fg, tint = ACCENTS[acc]
-        b += f'<rect x="{rx}" y="{y}" width="392" height="66" rx="14" fill="{CREAM}" stroke="{LINE}" stroke-width="1.5"/>'
-        b += f'<rect x="{rx + 12}" y="{y + 11}" width="44" height="44" rx="11" fill="{tint}"/>'
-        if icon == "pencil":
-            b += pix(sprite(PENCIL, rx + 22, y + 23, 2, C))
-        elif icon == "code":
-            b += pix(text("</>", rx + 34 - text_width("</>", 2) // 2, y + 26, 2, fg))
-        else:
-            b += pix(sprite(SPARKLE, rx + 23, y + 22, 3))
-        b += stext(title, rx + 72, y + 29, 17, INK, 700)
-        b += stext(sub, rx + 72, y + 50, 14, MUTED, 500)
-    save("about-card.svg", ssvg(W, H, b, "", "About me: designer first, developer second", SHADOW))
+    rh = 46
+    W, H = 1000, 30 + rh * len(rows)
+    b = mono("No.", 0, 16, c["muted"], 10.5) + mono("Area", 70, 16, c["muted"], 10.5) + mono("Tools", 250, 16, c["muted"], 10.5)
+    for i, (area, tools) in enumerate(rows):
+        y = 30 + i * rh
+        b += f'<g class="fu" style="animation-delay:{.05 + i * .07:.2f}s">'
+        b += f'<rect x="0" y="{y}" width="{W}" height="1" fill="{c["line"]}"/>'
+        b += mono(f"0{i + 1}", 0, y + 29, c["accent"], 11.5, weight=600)
+        b += t(area, 70, y + 30, 17, c["text"], 700)
+        b += t(tools, 250, y + 30, 15.5, c["body"])
+        b += "</g>"
+    save("skills", theme, svg(W, H, b, FADE_UP, "Skills: design, web, mobile, desktop, data, AI and ML, tools"))
 
 
-# ---------------------------------------------------------------- project card
-def card(name, title, kind, desc, tags, icon, acc):
-    W, H = 480, 250
-    fg, tint = ACCENTS[acc]
-    b = (
-        f'<g filter="url(#sh)"><rect x="8" y="4" width="{W - 16}" height="{H - 20}" rx="18" '
-        f'fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/></g>'
-    )
-    b += f'<rect x="32" y="28" width="60" height="60" rx="14" fill="{tint}"/>'
-    b += pix(sprite(ICONS[icon], 38, 34, 4))
-    b += stext(title, 108, 56, 22, INK, 700)
-    b += stext(kind.upper(), 108, 79, 11, fg, 700, spacing=1.4)
-    for i, line in enumerate(wrap(desc, 50)[:3]):
-        b += stext(line, 32, 124 + i * 23, 15.5, BODY)
-    x = 32
-    for t in tags:
-        tw = est_width(t, 12, 700) + 22
-        b += f'<rect x="{x}" y="186" width="{tw:.0f}" height="26" rx="13" fill="{tint}"/>'
-        b += stext(t, x + tw / 2, 203, 12, fg, 700, anchor="middle")
-        x += tw + 8
-    cx, cy = W - 54, 199
-    b += f'<circle cx="{cx}" cy="{cy}" r="18" fill="{INK}"/>'
-    b += (
-        f'<path d="M{cx - 6} {cy} h12 m-5 -5 l5 5 l-5 5" stroke="#fff" stroke-width="2" fill="none" '
-        f'stroke-linecap="round" stroke-linejoin="round"/>'
-    )
-    save(name, ssvg(W, H, b, "", f"{title}: {desc}", SHADOW))
-
-
-# ---------------------------------------------------------------- footer
-def footer():
+# ---------------------------------------------------------------- closing line
+def closing(theme):
+    c = THEMES[theme]
     W, H = 1000, 130
-    defs = '<clipPath id="r"><rect width="1000" height="130" rx="24"/></clipPath>'
-    b = '<g clip-path="url(#r)">'
-    b += '<path d="M0 40 C 200 10, 380 40, 560 28 S 860 10, 1000 30 V 130 H 0 Z" fill="#b2cf98"/>'
-    b += '<path d="M0 62 C 240 46, 520 70, 1000 52 V 130 H 0 Z" fill="#4e7a3a"/>'
-    b += "</g>"
-    b += stext("Thanks for stopping by. Let's make something nice together.", W / 2, 104, 18, "#fbf6ec", 600, anchor="middle")
-    for i, (sx, sy) in enumerate([(150, 70), (840, 74), (300, 30), (700, 22)]):
-        b += f'<g class="tw" style="animation-delay:{i * 0.7}s">{pix(sprite(SPARKLE, sx, sy, 2))}</g>'
-    style = ".tw{animation:tw 3s ease-in-out infinite}@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}"
-    save("footer-wave.svg", ssvg(W, H, b, style, "Thanks for stopping by", defs))
+    b = f'<rect x="0" y="0" width="{W}" height="1" fill="{c["line"]}"/>'
+    b += t("Draw it first. Then build it,", 0, 62, 34, c["text"], 700, ls=-0.8)
+    b += t("layer by layer.", 0, 104, 34, c["muted"], 700, ls=-0.8)
+    # A small stack of three cards that settles into place.
+    for i in range(3):
+        y = 30 + i * 18
+        op = (0.35, 0.6, 1)[i]
+        b += (
+            f'<g class="s{i}"><g transform="{ISO.format(x=880, y=y)}">'
+            f'<rect width="110" height="70" rx="8" fill="{c["plane"]}" stroke="{c["accent"] if i == 2 else c["line2"]}" stroke-opacity="{op}"/></g></g>'
+        )
+    style = ""
+    for i, d in enumerate([10, 0, -10]):
+        style += f".s{i}{{animation:s{i} 6s {EASE_IO} infinite}}@keyframes s{i}{{50%{{transform:translateY({d}px)}}}}"
+    save("closing", theme, svg(W, H, b, style, "Draw it first. Then build it, layer by layer."))
 
 
 if __name__ == "__main__":
@@ -571,30 +452,15 @@ if __name__ == "__main__":
             if f.endswith(".svg"):
                 os.remove(os.path.join(OUT, f))
     print("writing assets:")
-    hero()
-    about()
-    footer()
-    pill_button("button-portfolio.svg", "View portfolio", INK, "#fbf6ec")
-    pill_button("button-email.svg", "Email me", CARD, INK, stroke=LINE)
-    heading("h-projects.svg", "FEATURED PROJECTS")
-    heading("h-toolkit.svg", "TOOLKIT")
-    heading("h-stats.svg", "GITHUB STATS")
-
-    card("project-kuwago.svg", "kuwaGO", "Mobile app",
-         "A cozy pixel-art study garden. Focus to grow plants, then quiz yourself with AI made from your notes.",
-         ["Flutter", "Firebase", "Gemini"], "sprout", "green")
-    card("project-xpera.svg", "xpera CRM", "Desktop app",
-         "A CRM for gaming PC parts stores: customers, sales and payments, with one private database per store.",
-         ["C#", ".NET", "SQL Server"], "gamepad", "navy")
-    card("project-nichodev.svg", "Nicho.dev", "Portfolio site",
-         "My portfolio, with layered project stacks and a 3D room where the laptop has a working desktop.",
-         ["JavaScript", "Three.js"], "monitor", "clay")
-    card("project-cinematheque.svg", "Cinematheque", "Web app",
-         "A cinema web app built with Laravel and Blade.",
-         ["Laravel", "PHP", "MySQL"], "film", "brick")
-    card("project-sagap.svg", "sagap", "Mobile app",
-         "A mobile app that maps Wi-Fi dead zones.",
-         ["Flutter", "Dart"], "wifi", "teal")
-    card("project-payroller.svg", "PayRoller", "Desktop app",
-         "A payroll system with employee records, automatic pay computation and payroll history.",
-         ["Python", "PyQt6", "SQLite"], "coin", "gold")
+    for th in THEMES:
+        hero(th)
+        label("label-work", "01", "Selected work", "Fig. 01–03", th)
+        label("label-process", "02", "How I work", "One screen, brief to shipped", th)
+        label("label-numbers", "03", "By the numbers", "So far", th)
+        label("label-skills", "04", "Skills", "Area / tools", th)
+        for p in PROJECTS:
+            work(p, th)
+        process(th)
+        numbers(th)
+        skills(th)
+        closing(th)

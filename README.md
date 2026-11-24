@@ -1,52 +1,77 @@
-<p align="center">
-  <img src="assets/hero.svg" width="100%" alt="Nicho Lescano, UI/UX designer and developer. I design calm, clear and playful interfaces, then build them for mobile, desktop and the web. Based in the Philippines." />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg" />
+  <img src="assets/hero-light.svg" width="100%" alt="Nicho Lescano. UI/UX designer and developer, also into machine learning and AI automation. I draw every project first, then build it, layer by layer. Based in Davao City, Philippines." />
+</picture>
 
-<p align="center">
-  <a href="https://nicho-dev.vercel.app"><img src="assets/button-portfolio.svg" height="48" alt="View portfolio" /></a>
-  <a href="mailto:neckolescano36@gmail.com"><img src="assets/button-email.svg" height="48" alt="Email me" /></a>
-</p>
-
-<p align="center">
-  <img src="assets/about-card.svg" width="100%" alt="About me. Designer first, developer second. I'm an IT student from the Philippines who likes turning ideas into interfaces that feel calm, clear and a little playful. Design: Figma, Illustrator, prototyping. Build: Flutter, .NET, Laravel, JavaScript. Exploring: Three.js and AI features." />
-</p>
+[Portfolio](https://nicho-dev.vercel.app) &nbsp;·&nbsp; [Email](mailto:neckolescano36@gmail.com) &nbsp;·&nbsp; [kuwaGO](https://neckolescano.github.io/kuwaGO/)
 
 <br />
 
-<p align="center">
-  <img src="assets/h-projects.svg" height="56" alt="Featured projects" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/label-work-dark.svg" />
+  <img src="assets/label-work-light.svg" width="100%" alt="01 Selected work" />
+</picture>
 
-<p align="center">
-  <a href="https://github.com/neckolescano/kuwaGO"><img src="assets/project-kuwago.svg" width="49%" alt="kuwaGO: a cozy pixel-art study garden" /></a>
-  <a href="https://github.com/neckolescano/xpera"><img src="assets/project-xpera.svg" width="49%" alt="xpera CRM: a CRM for gaming PC parts stores" /></a>
-  <a href="https://github.com/neckolescano/Nicho.dev"><img src="assets/project-nichodev.svg" width="49%" alt="Nicho.dev: my portfolio with a 3D room" /></a>
-  <a href="https://github.com/neckolescano/IT12_cinematheque"><img src="assets/project-cinematheque.svg" width="49%" alt="Cinematheque: a cinema web app" /></a>
-  <a href="https://github.com/neckolescano/sagap"><img src="assets/project-sagap.svg" width="49%" alt="sagap: maps Wi-Fi dead zones" /></a>
-  <a href="https://github.com/neckolescano/IT5-payroller"><img src="assets/project-payroller.svg" width="49%" alt="PayRoller: a payroll system" /></a>
-</p>
+<a href="https://github.com/neckolescano/kuwaGO">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/work-kuwago-dark.svg" />
+    <img src="assets/work-kuwago-light.svg" width="100%" alt="kuwaGO, mobile app. A cozy study garden: finish a focus session and your plant grows. Flutter, Firebase, Gemini. 30 days to ship, 18 testers, 72 tests." />
+  </picture>
+</a>
+<a href="https://github.com/neckolescano/IT12_cinematheque">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/work-cinematheque-dark.svg" />
+    <img src="assets/work-cinematheque-light.svg" width="100%" alt="Cinematheque, web system. Ticketing for a real cinema with seat picking and online payment. Laravel, MySQL, PayMongo. 129 tests." />
+  </picture>
+</a>
+<a href="https://github.com/neckolescano/xpera">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/work-xpera-dark.svg" />
+    <img src="assets/work-xpera-light.svg" width="100%" alt="xpera CRM, desktop system. A customer system for gaming PC parts stores. C#, .NET WinForms, SQL Server. 15 use cases, 4 user roles." />
+  </picture>
+</a>
+
+Also: [Nicho.dev](https://github.com/neckolescano/Nicho.dev), my portfolio with a 3D room &nbsp;·&nbsp; [sagap](https://github.com/neckolescano/sagap), a Wi-Fi dead zone mapper &nbsp;·&nbsp; [PayRoller](https://github.com/neckolescano/IT5-payroller), a payroll system in PyQt6
 
 <br />
 
-<p align="center">
-  <img src="assets/h-toolkit.svg" height="56" alt="Toolkit" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/label-process-dark.svg" />
+  <img src="assets/label-process-light.svg" width="100%" alt="02 How I work" />
+</picture>
 
-<p align="center">
-  <img src="https://skillicons.dev/icons?i=figma,ai,html,css,js,threejs,php,laravel,cs,dotnet,flutter,dart,python,mysql,sqlite,firebase,git,vscode&perline=9&theme=light" alt="Figma, Illustrator, HTML, CSS, JavaScript, Three.js, PHP, Laravel, C#, .NET, Flutter, Dart, Python, MySQL, SQLite, Firebase, Git, VS Code" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/process-dark.svg" />
+  <img src="assets/process-light.svg" width="100%" alt="Brief, sketch, wireframe, design, build and ship." />
+</picture>
 
 <br />
 
-<p align="center">
-  <img src="assets/h-stats.svg" height="56" alt="GitHub stats" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/label-numbers-dark.svg" />
+  <img src="assets/label-numbers-light.svg" width="100%" alt="03 By the numbers" />
+</picture>
 
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=neckolescano&show_icons=true&count_private=true&bg_color=fffdf8&title_color=4e7a3a&text_color=5a4a3a&icon_color=b5653e&ring_color=8db577&border_color=e8dfcc&border_radius=16" height="165" alt="GitHub stats" />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=neckolescano&layout=compact&bg_color=fffdf8&title_color=4e7a3a&text_color=5a4a3a&border_color=e8dfcc&border_radius=16" height="165" alt="Top languages" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/numbers-dark.svg" />
+  <img src="assets/numbers-light.svg" width="100%" alt="3 systems shipped, 201 automated tests, 18 real testers, 30 days to ship kuwaGO." />
+</picture>
 
-<p align="center">
-  <img src="assets/footer-wave.svg" width="100%" alt="Thanks for stopping by. Let's make something nice together." />
-</p>
+<br />
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/label-skills-dark.svg" />
+  <img src="assets/label-skills-light.svg" width="100%" alt="04 Skills" />
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/skills-dark.svg" />
+  <img src="assets/skills-light.svg" width="100%" alt="Design: Figma, UI/UX, brand and logo. Web: Laravel, PHP, JavaScript. Mobile: Flutter, Dart, Firebase. Desktop: C#, .NET. Data: MySQL, SQL Server, EF Core. AI and ML: machine learning, AI automation, Gemini. Tools: Git, Cloudflare Workers." />
+</picture>
+
+<br />
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/closing-dark.svg" />
+  <img src="assets/closing-light.svg" width="100%" alt="Draw it first. Then build it, layer by layer." />
+</picture>
