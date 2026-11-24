@@ -180,38 +180,6 @@ def art_xpera(c, x0, y0):
     return s, style
 
 
-PROJECTS = [
-    dict(
-        file="card-kuwago", fig="Fig. 01 / Mobile app", size="390 × 844", name="kuwaGO",
-        desc="A cozy study garden: focus and your plant grows, give up and it wilts. AI turns your notes into quizzes.",
-        stack="Flutter · Firebase · Gemini · Cloudflare Workers",
-        proof=[("30", "days to ship"), ("18", "testers"), ("72", "tests")],
-        art=art_kuwago,
-    ),
-    dict(
-        file="card-cinematheque", fig="Fig. 02 / Web system", size="1440 × 900", name="Cinematheque",
-        desc="Ticketing for a real cinema. Moviegoers pick exact seats, pay online and get an e-ticket; staff run schedules and reports.",
-        stack="Laravel 12 · MySQL · PayMongo · Blade",
-        proof=[("129", "tests"), ("3", "person team"), ("1", "real client")],
-        art=art_cinema,
-    ),
-    dict(
-        file="card-xpera", fig="Fig. 03 / Desktop system", size="1600 × 945", name="xpera CRM",
-        desc="A customer system for stores that sell gaming PC parts: who each customer is, what they buy, owe and need.",
-        stack="C# · .NET WinForms · SQL Server · EF Core",
-        proof=[("15", "use cases"), ("4", "user roles"), ("1", "database per store")],
-        art=art_xpera, art_h=200,
-    ),
-    dict(
-        file="card-nichodev", fig="Fig. 04 / Portfolio site", size="1440 × 900",
-        desc="My portfolio. Layered project stacks, case studies, and a 3D room you can walk into, with a working laptop desktop.",
-        stack="HTML · CSS · JavaScript · Three.js",
-        proof=[("3", "case studies"), ("1", "3D room")],
-        art=None,
-    ),
-]
-
-
 # ---------------------------------------------------------------- hero
 LOOP = 10.0  # seconds for one full build of the stack
 
@@ -421,33 +389,138 @@ def art_nichodev(c, x0, y0):
     return s, style
 
 
-# ---------------------------------------------------------------- project card
+# ---------------------------------------------------------------- project art: sagap
+def art_sagap(c, x0, y0):
+    """A floor plan: signal rings spread from the router, a dead zone pulses."""
+    s = ""
+    w, h = 330, 214
+    s += f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="12" stroke="{c["line2"]}" fill="{c["plane"]}" fill-opacity="0.35"/>'
+    s += f'<defs><clipPath id="room"><rect x="{x0 + 14}" y="{y0 + 14}" width="{w - 28}" height="{h - 28}" rx="6"/></clipPath></defs>'
+    # walls
+    s += f'<rect x="{x0 + 14}" y="{y0 + 14}" width="{w - 28}" height="{h - 28}" rx="6" stroke="{c["wire"]}" stroke-width="2"/>'
+    s += f'<path d="M{x0 + 130} {y0 + 14} V{y0 + 90} M{x0 + 130} {y0 + 120} V{y0 + h - 14} M{x0 + 14} {y0 + 110} H{x0 + 90} M{x0 + 210} {y0 + 120} H{x0 + w - 14}" stroke="{c["wire"]}" stroke-width="2"/>'
+    rx_, ry_ = x0 + 70, y0 + 60
+    s += f'<g clip-path="url(#room)">'
+    for i in range(3):
+        s += f'<circle class="wave" style="animation-delay:{i * 1.1:.1f}s" cx="{rx_}" cy="{ry_}" r="150" stroke="{c["green"]}" stroke-width="2"/>'
+    # the dead zone
+    dx, dy = x0 + 262, y0 + 162
+    s += f'<circle class="dead" cx="{dx}" cy="{dy}" r="30" fill="{c["accent"]}"/>'
+    s += "</g>"
+    s += f'<circle cx="{dx}" cy="{dy}" r="30" stroke="{c["accent"]}" stroke-dasharray="4 4"/>'
+    s += mono("dead zone", dx, dy + 4, c["accent"], 9, anchor="middle", weight=700)
+    # router
+    s += f'<rect x="{rx_ - 14}" y="{ry_ - 8}" width="28" height="16" rx="4" fill="{c["text"]}"/>'
+    s += f'<path d="M{rx_ - 7} {ry_ - 8} v-9 M{rx_ + 7} {ry_ - 8} v-9" stroke="{c["text"]}" stroke-width="2" stroke-linecap="round"/>'
+    style = (
+        f".wave{{transform-box:fill-box;transform-origin:center;animation:wave 3.3s {EASE} infinite both}}"
+        "@keyframes wave{0%{transform:scale(.08);opacity:.9}100%{transform:scale(1);opacity:0}}"
+        f".dead{{animation:dead 3s {EASE_IO} infinite}}@keyframes dead{{0%,100%{{opacity:.12}}50%{{opacity:.32}}}}"
+    )
+    return s, style
+
+
+# ---------------------------------------------------------------- project art: payroller
+def art_payroll(c, x0, y0):
+    """A payroll table; each row lights up as its pay is computed."""
+    s = ""
+    w, h = 330, 214
+    s += f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="12" stroke="{c["line2"]}" fill="{c["plane"]}" fill-opacity="0.35"/>'
+    s += f'<path d="M{x0} {y0 + 24} H{x0 + w}" stroke="{c["line"]}"/>'
+    for i in range(3):
+        s += f'<circle cx="{x0 + 16 + i * 12}" cy="{y0 + 12}" r="3.5" fill="{c["block"]}"/>'
+    cols = [("Employee", 20), ("Hours", 150), ("Net pay", 230)]
+    for name, cx in cols:
+        s += mono(name, x0 + cx, y0 + 46, c["muted"], 9, weight=600)
+    widths = [(90, 26, 54), (70, 22, 62), (100, 28, 48), (80, 24, 58)]
+    for i, (a, b_, n) in enumerate(widths):
+        y = y0 + 58 + i * 28
+        s += f'<rect class="row" style="animation-delay:{i * .55:.2f}s" x="{x0 + 10}" y="{y}" width="{w - 20}" height="24" rx="6" fill="{c["accent"]}" fill-opacity="0.14"/>'
+        s += f'<rect x="{x0 + 20}" y="{y + 8}" width="{a}" height="8" rx="4" fill="{c["text"]}" fill-opacity="0.7"/>'
+        s += f'<rect x="{x0 + 150}" y="{y + 8}" width="{b_}" height="8" rx="4" fill="{c["block"]}"/>'
+        s += f'<rect class="pay" style="animation-delay:{i * .55 + .2:.2f}s" x="{x0 + 230}" y="{y + 8}" width="{n}" height="8" rx="4" fill="{c["green"]}"/>'
+    s += f'<path d="M{x0 + 10} {y0 + h - 30} H{x0 + w - 10}" stroke="{c["line2"]}"/>'
+    s += mono("Total", x0 + 20, y0 + h - 12, c["muted"], 9, weight=600)
+    s += f'<rect x="{x0 + 230}" y="{y0 + h - 20}" width="70" height="9" rx="4.5" fill="{c["text"]}"/>'
+    style = (
+        f".row{{animation:row 5s {EASE} infinite both}}"
+        "@keyframes row{0%,8%{opacity:0}16%,30%{opacity:1}45%,100%{opacity:0}}"
+        f".pay{{transform-box:fill-box;transform-origin:left;animation:pay 5s {EASE} infinite both}}"
+        "@keyframes pay{0%{transform:scaleX(0)}20%,90%{transform:scaleX(1)}100%{transform:scaleX(0)}}"
+    )
+    return s, style
+
+
+# ---------------------------------------------------------------- project card (compact)
 def card(p, theme):
     c = THEMES[theme]
-    W, H = 490, 456
+    W, H = 490, 338
     top = 22
     b = frame(W, H, p["fig"], p["size"], c, top)
-    # Canvas area with a dot grid, holding the animated mockup.
-    ax, ay, aw, ah = 16, top + 15, W - 32, 196
+    ax, ay, aw, ah = 14, top + 13, W - 28, 140
     b += f'<rect x="{ax}" y="{ay}" width="{aw}" height="{ah}" rx="2" fill="url(#dg)"/>'
     art, astyle = p["art"](c, 0, 0)
-    sc = 0.74
-    bw, bh = p.get("art_w", 330) * sc, p.get("art_h", 214) * sc
-    b += f'<g class="fu" style="animation-delay:.1s"><g transform="translate({ax + (aw - bw) / 2:.0f} {ay + (ah - bh) / 2 + 4:.0f}) scale({sc})">{art}</g></g>'
-    b += f'<rect x="16" y="{ay + ah + 14}" width="{W - 32}" height="1" fill="{c["line"]}"/>'
-    y = ay + ah + 46
-    b += f'<g class="fu" style="animation-delay:.15s">{t(p["name"], 15, y, 26, c["text"], 800, ls=-0.8)}</g>'
-    for i, line in enumerate(wrap(p["desc"], 56)[:3]):
-        b += f'<g class="fu" style="animation-delay:{.2 + i * .04:.2f}s">{t(line, 16, y + 28 + i * 21, 14.5, c["body"])}</g>'
-    b += mono(p["stack"], 16, H - 44, c["muted"], 9.5)
-    x = 16
-    for n, lab in p["proof"]:
-        b += t(n, x, H - 18, 15, c["text"], 800)
-        nw = len(n) * 9.5 + 6
-        b += mono(lab, x + nw, H - 19, c["muted"], 9.5)
+    sc = 0.58
+    bw, bh = 330 * sc, p.get("art_h", 214) * sc
+    b += f'<g class="fu" style="animation-delay:.1s"><g transform="translate({ax + (aw - bw) / 2:.0f} {ay + (ah - bh) / 2:.0f}) scale({sc})">{art}</g></g>'
+    b += f'<rect x="14" y="{ay + ah + 12}" width="{W - 28}" height="1" fill="{c["line"]}"/>'
+    y = ay + ah + 42
+    b += f'<g class="fu" style="animation-delay:.15s">{t(p["name"], 14, y, 23, c["text"], 800, ls=-0.7)}</g>'
+    if p.get("status"):
+        nw = len(p["name"]) * 13.2 + 26
+        sw = len(p["status"]) * 7.2 + 26
+        b += f'<rect x="{nw:.0f}" y="{y - 15}" width="{sw:.0f}" height="18" rx="9" stroke="{c["line2"]}"/>'
+        b += f'<circle class="pulse" cx="{nw + 10:.0f}" cy="{y - 6}" r="3" fill="{c["green"]}"/>'
+        b += mono(p["status"], nw + 18, y - 2, c["muted"], 9, weight=600)
+    for i, line in enumerate(wrap(p["desc"], 60)[:2]):
+        b += f'<g class="fu" style="animation-delay:{.2 + i * .04:.2f}s">{t(line, 14, y + 26 + i * 20, 14, c["body"])}</g>'
+    b += mono(p["stack"], 14, H - 38, c["muted"], 9.5)
+    x = 14
+    for n, lab in p.get("proof", []):
+        b += t(n, x, H - 14, 14.5, c["text"], 800)
+        nw = len(n) * 9.2 + 6
+        b += mono(lab, x + nw, H - 15, c["muted"], 9.5)
         x += nw + len(lab) * 7.4 + 20
-    defs = dots("dg", c)
-    save(p["file"], theme, svg(W, H, b, FADE_UP + astyle, f'{p["name"]}: {p["desc"]}', defs))
+    style = FADE_UP + astyle + (
+        f".pulse{{animation:pulse 2.4s {EASE_IO} infinite}}@keyframes pulse{{50%{{opacity:.25}}}}"
+    )
+    save(p["file"], theme, svg(W, H, b, style, f'{p["name"]}: {p["desc"]}', dots("dg", c)))
+
+
+# ---------------------------------------------------------------- now
+def now(theme):
+    c = THEMES[theme]
+    items = [
+        ("Building", "xpera CRM", "Multi-tenant desktop system", c["accent"]),
+        ("Shipping", "kuwaGO", "Early access, heading to Play", c["green"]),
+        ("Learning", "Machine learning", "and building with AI automation", c["gold"]),
+        ("Studying", "BS IT, 3rd year", "University of Mindanao", c["muted"]),
+    ]
+    W, H = 1000, 112
+    b = frame(W, H, "now.log", "Updated Nov 2026", c, top=22)
+    cw = (W - 2) / 4
+    for i, (k, v, sub, col) in enumerate(items):
+        x = 1 + i * cw + 20
+        if i:
+            b += f'<rect x="{1 + i * cw:.0f}" y="38" width="1" height="58" fill="{c["line"]}"/>'
+        b += f'<circle class="p{i}" cx="{x + 4:.0f}" cy="49" r="4" fill="{col}"/>'
+        b += mono(k, x + 16, 53, col, 10.5, weight=700)
+        b += t(v, x, 78, 16.5, c["text"], 700)
+        b += mono(sub, x, 96, c["muted"], 9)
+    style = "".join(
+        f".p{i}{{animation:pl 2.6s {EASE_IO} infinite {i * .4:.1f}s}}" for i in range(4)
+    ) + "@keyframes pl{50%{opacity:.25}}"
+    save("now", theme, svg(W, H, b, style, "Now: building xpera CRM, shipping kuwaGO, learning machine learning, studying BS IT at the University of Mindanao."))
+
+
+# ---------------------------------------------------------------- footer
+def footer(theme):
+    c = THEMES[theme]
+    W, H = 1000, 46
+    b = f'<rect x="0" y="0" width="{W}" height="1" fill="{c["line2"]}"/>'
+    b += mono("Draw it first. Build it layer by layer.", 0, 30, c["muted"], 10.5)
+    b += mono("© 2026 Nicho Lescano · Davao City, PH", W, 30, c["faint"], 10.5, anchor="end")
+    save("footer", theme, svg(W, H, b, "", "Draw it first. Build it layer by layer."))
 
 
 # ---------------------------------------------------------------- skills
@@ -477,9 +550,52 @@ def skills(theme):
     framed("skills", theme, 1000, W, H, b, FADE_UP, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
 
 
+PROJECTS = [
+    dict(
+        file="card-kuwago", fig="Fig. 01 / Mobile app", size="390 × 844", name="kuwaGO",
+        desc="A cozy study garden: focus and your plant grows, give up and it wilts. AI turns your notes into quizzes.", status="Early access",
+        stack="Flutter · Firebase · Gemini · Cloudflare Workers",
+        proof=[("30", "days to ship"), ("18", "testers"), ("72", "tests")],
+        art=art_kuwago,
+    ),
+    dict(
+        file="card-cinematheque", fig="Fig. 02 / Web system", size="1440 × 900", name="Cinematheque",
+        desc="Ticketing for a real cinema: pick exact seats, pay online, get an e-ticket. Staff run schedules and reports.", status="Shipped",
+        stack="Laravel 12 · MySQL · PayMongo · Blade",
+        proof=[("129", "tests"), ("3", "person team"), ("1", "real client")],
+        art=art_cinema,
+    ),
+    dict(
+        file="card-xpera", fig="Fig. 03 / Desktop system", size="1600 × 945", name="xpera CRM",
+        desc="A customer system for stores that sell gaming PC parts: who each customer is, what they buy, owe and need.", status="In progress",
+        stack="C# · .NET WinForms · SQL Server · EF Core",
+        proof=[("15", "use cases"), ("4", "user roles"), ("1", "database per store")],
+        art=art_xpera, art_h=200,
+    ),
+    dict(
+        file="card-nichodev", fig="Fig. 04 / Portfolio site", size="1440 × 900", name="Nicho.dev",
+        desc="My portfolio: layered project stacks, case studies and a 3D room with a working laptop desktop.", status="Live",
+        stack="HTML · CSS · JavaScript · Three.js",
+        proof=[("3", "case studies"), ("1", "3D room")],
+        art=art_nichodev,
+    ),
+    dict(
+        file="card-sagap", fig="Fig. 05 / Mobile app", size="390 × 844", name="sagap",
+        desc="A Wi-Fi dead zone mapper: see where the signal is strong and where it drops out.",
+        stack="Flutter · Dart",
+        art=art_sagap,
+    ),
+    dict(
+        file="card-payroller", fig="Fig. 06 / Desktop app", size="1280 × 800", name="PayRoller",
+        desc="A payroll system: employee records, automatic pay computation and payroll history.",
+        stack="Python · PyQt6 · SQLite",
+        proof=[("3", "modules"), ("1", "local database")],
+        art=art_payroll,
+    ),
+]
+
+
 if __name__ == "__main__":
-    PROJECTS[3]["art"] = art_nichodev
-    PROJECTS[3]["name"] = "Nicho.dev"
     if os.path.isdir(OUT):
         for f in os.listdir(OUT):
             if f.endswith(".svg"):
@@ -487,8 +603,11 @@ if __name__ == "__main__":
     print("writing assets:")
     for th in THEMES:
         hero(th)
-        label("label-work", "01", "Selected work", "Fig. 01–04", th)
-        label("label-skills", "02", "Skills", "What I build with", th)
+        label("label-now", "01", "Now", "What I am up to", th)
+        label("label-work", "02", "Selected work", "Fig. 01–06", th)
+        label("label-skills", "03", "Skills", "What I build with", th)
+        now(th)
+        footer(th)
         nav("nav-portfolio", "Portfolio", "nicho-dev.vercel.app", "Case studies and the 3D room", th)
         nav("nav-email", "Direct line", "Email me", "neckolescano36@gmail.com", th)
         nav("nav-kuwago", "Live app", "kuwaGO", "Early access, heading to Play", th)
