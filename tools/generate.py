@@ -518,7 +518,7 @@ def about():
             b += pix(sprite(SPARKLE, rx + 23, y + 22, 3))
         b += stext(title, rx + 72, y + 29, 17, INK, 700)
         b += stext(sub, rx + 72, y + 50, 14, MUTED, 500)
-    save("about.svg", ssvg(W, H, b, "", "About me: designer first, developer second", SHADOW))
+    save("about-card.svg", ssvg(W, H, b, "", "About me: designer first, developer second", SHADOW))
 
 
 # ---------------------------------------------------------------- project card
@@ -562,7 +562,7 @@ def footer():
     for i, (sx, sy) in enumerate([(150, 70), (840, 74), (300, 30), (700, 22)]):
         b += f'<g class="tw" style="animation-delay:{i * 0.7}s">{pix(sprite(SPARKLE, sx, sy, 2))}</g>'
     style = ".tw{animation:tw 3s ease-in-out infinite}@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}"
-    save("footer.svg", ssvg(W, H, b, style, "Thanks for stopping by", defs))
+    save("footer-wave.svg", ssvg(W, H, b, style, "Thanks for stopping by", defs))
 
 
 if __name__ == "__main__":
@@ -574,27 +574,27 @@ if __name__ == "__main__":
     hero()
     about()
     footer()
-    pill_button("btn-portfolio.svg", "View portfolio", INK, "#fbf6ec")
-    pill_button("btn-email.svg", "Email me", CARD, INK, stroke=LINE)
+    pill_button("button-portfolio.svg", "View portfolio", INK, "#fbf6ec")
+    pill_button("button-email.svg", "Email me", CARD, INK, stroke=LINE)
     heading("h-projects.svg", "FEATURED PROJECTS")
     heading("h-toolkit.svg", "TOOLKIT")
     heading("h-stats.svg", "GITHUB STATS")
 
-    card("card-kuwago.svg", "kuwaGO", "Mobile app",
+    card("project-kuwago.svg", "kuwaGO", "Mobile app",
          "A cozy pixel-art study garden. Focus to grow plants, then quiz yourself with AI made from your notes.",
          ["Flutter", "Firebase", "Gemini"], "sprout", "green")
-    card("card-xpera.svg", "xpera CRM", "Desktop app",
+    card("project-xpera.svg", "xpera CRM", "Desktop app",
          "A CRM for gaming PC parts stores: customers, sales and payments, with one private database per store.",
          ["C#", ".NET", "SQL Server"], "gamepad", "navy")
-    card("card-nichodev.svg", "Nicho.dev", "Portfolio site",
+    card("project-nichodev.svg", "Nicho.dev", "Portfolio site",
          "My portfolio, with layered project stacks and a 3D room where the laptop has a working desktop.",
          ["JavaScript", "Three.js"], "monitor", "clay")
-    card("card-cinematheque.svg", "Cinematheque", "Web app",
+    card("project-cinematheque.svg", "Cinematheque", "Web app",
          "A cinema web app built with Laravel and Blade.",
          ["Laravel", "PHP", "MySQL"], "film", "brick")
-    card("card-sagap.svg", "sagap", "Mobile app",
+    card("project-sagap.svg", "sagap", "Mobile app",
          "A mobile app that maps Wi-Fi dead zones.",
          ["Flutter", "Dart"], "wifi", "teal")
-    card("card-payroller.svg", "PayRoller", "Desktop app",
+    card("project-payroller.svg", "PayRoller", "Desktop app",
          "A payroll system with employee records, automatic pay computation and payroll history.",
          ["Python", "PyQt6", "SQLite"], "coin", "gold")
