@@ -1,8 +1,8 @@
-"""Generates the pixel-art SVGs used in the profile README.
+"""Generates the SVGs used in the profile README.
 
 Run:  python tools/generate.py   (writes into assets/)
-Everything is drawn from rectangles, so the art stays crisp at any size
-and needs no fonts or external files.
+Smooth, rounded layouts with real system-font text, plus small pixel-art
+accents (icons, sparkles, cursor, the name) drawn from rectangles.
 """
 import math
 import os
@@ -11,10 +11,10 @@ import random
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets")
 
 # ---------------------------------------------------------------- palette
-# Taken from the kuwaGO app icon and banner.
+# Pixel-art colours: warm ink, wood, gold and leaf greens.
 C = {
     "a": "#2b1a10",  # ink (outline)
-    "b": "#8b5a34",  # owl brown
+    "b": "#8b5a34",  # brown
     "c": "#fff4e0",  # cream highlight
     "d": "#e8b84b",  # gold
     "e": "#5a3a22",  # dark bark
@@ -86,6 +86,7 @@ FONT = {
     "&": [".#...", "#.#..", "#.#..", ".#...", "#.#.#", "#..#.", ".##.#"],
     "?": [".###.", "#...#", "...#.", "..#..", "..#..", ".....", "..#.."],
     ">": ["#...", ".#..", "..#.", "...#", "..#.", ".#..", "#..."],
+    "<": ["...#", "..#.", ".#..", "#...", ".#..", "..#.", "...#"],
     "*": [".....", "..#..", "#.#.#", ".###.", "#.#.#", "..#..", "....."],
     "@": [".###.", "#...#", "#.###", "#.#.#", "#.##.", "#....", ".###."],
     "(": ["..#", ".#.", "#..", "#..", "#..", ".#.", "..#"],
@@ -153,26 +154,6 @@ def rect(x, y, w, h, fill, extra=""):
     return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"{extra}/>'
 
 
-def panel(x, y, w, h, fill, border=C["a"], b=5):
-    """Box with a pixel border and notched corners."""
-    return (
-        rect(x + b, y, w - 2 * b, b, border)
-        + rect(x + b, y + h - b, w - 2 * b, b, border)
-        + rect(x, y + b, b, h - 2 * b, border)
-        + rect(x + w - b, y + b, b, h - 2 * b, border)
-        + rect(x + b, y + b, w - 2 * b, h - 2 * b, fill)
-    )
-
-
-def svg(w, h, body, style="", title=""):
-    return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
-        f'shape-rendering="crispEdges" role="img" aria-label="{title}">'
-        f"<title>{title}</title>"
-        f"<style>{style}</style>{body}</svg>"
-    )
-
-
 def save(name, content):
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
@@ -180,47 +161,77 @@ def save(name, content):
     print(f"  {name:22s} {len(content) // 1024} KB")
 
 
-# ---------------------------------------------------------------- sprites
-OWL = [
-    ".........a..............a.........",
-    ".........aa............aa.........",
-    ".........aba..........aba.........",
-    ".........abbaaaaaaaaaabba.........",
-    ".........abbbbbbbbbbbbbba.........",
-    "........abbbbbbbbbbbbbbbba........",
-    "........abbaabbbbbbbbaabba........",
-    ".......abaccccabbbbaccccaba.......",
-    ".......abacaacabbbbacaacaba.......",
-    ".......abacaacabddbacaacaba.......",
-    ".......abaccccabddbaccccaba.......",
-    ".......abbbaabbbddbbbaabbba.......",
-    ".......aebbbffffggffffbbbea.......",
-    "......aeebbffhffhhffhffbbeea......",
-    "......aeebfffhffffffhfffbeea......",
-    "......aeebffhffhffhffhffbeea......",
-    "......aeebbffffffffffffbbeea......",
-    ".......aebbbffhffffhffbbbea.......",
-    ".......aeebbbffffffffbbbeea.......",
-    "........aeebbbbbbbbbbbbeea........",
-    ".........aaaaddaaaaddaaaa.........",
-    ".....eeeeeeeeddeeeeddeeeeeeij.....",
-    ".....hhhhhhhhhhhhhhhhhhhhijji.....",
-    ".....aaaaaaaaaaaaaaaaaaaa.ij......",
-]
-# Closed eyes, drawn over the open ones for the blink.
-def _blink_rows():
-    rows = []
-    for i, row in enumerate(OWL[7:11]):
-        r = ["."] * len(row)
-        for lo in (10, 20):
-            for x in range(lo, lo + 4):
-                r[x] = "a" if i == 2 else "b"
-        rows.append("".join(r))
-    return rows
+# =====================================================================
+# Smooth layer: rounded shapes and real text, with pixel art as accents.
+# =====================================================================
+SANS = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+INK = "#2b2118"
+BODY = "#5a4a3a"
+MUTED = "#8a7a68"
+CARD = "#fffdf8"
+LINE = "#e8dfcc"
+CREAM = "#fbf6ec"
+
+ACCENTS = {
+    "green": ("#4e7a3a", "#e4eeda"),
+    "navy": ("#3b4a6b", "#e2e6ef"),
+    "clay": ("#b5653e", "#f5e3d8"),
+    "brick": ("#a3483a", "#f3deda"),
+    "teal": ("#2f7a73", "#dcefec"),
+    "gold": ("#a87a1f", "#f6ebcf"),
+}
 
 
-OWL_BLINK = _blink_rows()
+def esc(t):
+    return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+
+def stext(t, x, y, size, color, weight=400, anchor="start", spacing=0):
+    extra = f' letter-spacing="{spacing}"' if spacing else ""
+    return (
+        f'<text x="{x}" y="{y}" font-family="{SANS}" font-size="{size}" font-weight="{weight}" '
+        f'fill="{color}" text-anchor="{anchor}"{extra}>{esc(t)}</text>'
+    )
+
+
+def est_width(t, size, weight=400):
+    """Rough width of sans text, good enough for sizing pills."""
+    per = 0.55 if weight < 600 else 0.6
+    return len(t) * size * per
+
+
+def pix(inner):
+    return f'<g shape-rendering="crispEdges">{inner}</g>'
+
+
+def ssvg(w, h, body, style="", title="", defs=""):
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+        f'role="img" aria-label="{esc(title)}"><title>{esc(title)}</title>'
+        f"<defs>{defs}</defs><style>{style}</style>{body}</svg>"
+    )
+
+
+SHADOW = (
+    '<filter id="sh" x="-10%" y="-10%" width="120%" height="140%">'
+    '<feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#2b2118" flood-opacity="0.12"/></filter>'
+)
+
+
+def wrap(t, n):
+    words, lines, cur = t.split(), [], ""
+    for w in words:
+        if len(cur) + len(w) + (1 if cur else 0) > n:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}" if cur else w
+    lines.append(cur)
+    return lines
+
+
+# ---------------------------------------------------------------- pixel accents
+SPARKLE = ["...d...", "...d...", "..ddd..", "ddddddd", "..ddd..", "...d...", "...d..."]
 CLOUD = [
     "......wwww..........",
     "....wwwwwwww..www...",
@@ -229,22 +240,34 @@ CLOUD = [
     "wwwwwwwwwwwwwwwwwwww",
     ".sssssssssssssssss..",
 ]
-
-SPARK = ["..d..", ".ddd.", "ddcdd", ".ddd.", "..d.."]
-
-SPROUT = [
-    "...jj..",
-    "..jiij.",
-    "jj.jij.",
-    "jij.j..",
-    ".jjjj..",
-    "...j...",
-    "...j...",
+CURSOR = [
+    "a.........",
+    "aa........",
+    "aca.......",
+    "acca......",
+    "accca.....",
+    "acccca....",
+    "accccca...",
+    "acccccca..",
+    "accccaaaa.",
+    "acaaca....",
+    "aa..aca...",
+    "a....aca..",
+    ".....aa...",
 ]
-
-FLOWER_P = [".p.", "pdp", ".p.", ".j."]
-FLOWER_W = [".c.", "cdc", ".c.", ".j."]
-
+PIN = ["..lll..", ".lllll.", "lll.lll", "lll.lll", ".lllll.", "..lll..", "...l..."]
+PENCIL = [
+    "........aa..",
+    ".......alla.",
+    "......adala.",
+    ".....adda...",
+    "....adda....",
+    "...adda.....",
+    "..adda......",
+    ".affa.......",
+    ".aaa........",
+    "aa..........",
+]
 ICONS = {
     "sprout": [
         "............",
@@ -333,314 +356,245 @@ ICONS = {
 }
 
 
-# ---------------------------------------------------------------- banner
-def banner():
+# ---------------------------------------------------------------- hero
+def hero():
     W, H = 1000, 360
-    rnd = random.Random(7)
-    body = ""
+    defs = (
+        '<clipPath id="r"><rect width="1000" height="360" rx="24"/></clipPath>'
+        '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">'
+        '<stop offset="0" stop-color="#fbf6ec"/><stop offset="1" stop-color="#e9f1dc"/></linearGradient>'
+        '<radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">'
+        '<stop offset="0" stop-color="#f3d48a" stop-opacity="0.55"/>'
+        '<stop offset="1" stop-color="#f3d48a" stop-opacity="0"/></radialGradient>'
+        + SHADOW
+    )
+    b = '<g clip-path="url(#r)">'
+    b += rect(0, 0, W, H, "url(#sky)")
+    b += '<circle cx="800" cy="120" r="220" fill="url(#sun)"/>'
+    for cy, s, dur, delay in [(36, 4, 90, -20), (110, 3, 120, -70), (60, 3, 140, -110)]:
+        b += (
+            f'<g class="cloud" style="animation-duration:{dur}s;animation-delay:{delay}s" opacity="0.9">'
+            f"{pix(sprite(CLOUD, 0, cy, s))}</g>"
+        )
+    b += '<path d="M0 290 C 160 250, 300 270, 460 285 S 760 250, 1000 275 V 360 H 0 Z" fill="#d3e4bf"/>'
+    b += '<path d="M0 318 C 200 296, 380 322, 560 312 S 860 296, 1000 312 V 360 H 0 Z" fill="#b2cf98"/>'
+    b += '<path d="M0 342 C 260 332, 520 348, 1000 336 V 360 H 0 Z" fill="#8db577"/>'
+    b += "</g>"
 
-    # Sky: stepped bands with a dithered seam between each pair.
-    top, bot = (0xF8, 0xF0, 0xDE), (0xDC, 0xEF, 0xC8)
-    bands = 7
-    bh = 45
-    cols = []
-    for i in range(bands):
-        t = i / (bands - 1)
-        cols.append("#%02x%02x%02x" % tuple(round(a + (b - a) * t) for a, b in zip(top, bot)))
-    for i, col in enumerate(cols):
-        body += rect(0, i * bh, W, bh if i < bands - 1 else H - i * bh, col)
-    for i in range(1, bands):
-        y = i * bh - 5
-        cells = {(cx, 0) for cx in range(0, W // 5) if cx % 2 == 0}
-        cells |= {(cx, -1) for cx in range(0, W // 5) if cx % 4 == 1}
-        body += merge_rects(cells, 5, 0, y, cols[i])
+    # Left: intro.
+    x = 64
+    label = "UI/UX DESIGNER  ·  DEVELOPER"
+    lw = est_width(label, 12, 700) + 36
+    b += f'<rect x="{x}" y="56" width="{lw:.0f}" height="30" rx="15" fill="#4e7a3a" fill-opacity="0.12"/>'
+    b += stext(label, x + 18, 76, 12, "#3f6b2e", 700, spacing=1.6)
+    b += pix(text("NICHO LESCANO", x, 110, 7, INK, shadow="#cfe2bb"))
+    b += stext("I design calm, clear and playful interfaces,", x, 200, 21, BODY, 500)
+    b += stext("then build them for mobile, desktop and the web.", x, 230, 21, BODY, 500)
+    b += pix(sprite(PIN, x, 263, 2, {"l": "#b5653e"}))
+    b += stext("Based in the Philippines", x + 22, 276, 15, MUTED, 500)
 
-    # Drifting clouds.
-    for i, (cy, s, dur, delay) in enumerate([(40, 5, 70, -10), (95, 4, 90, -55), (150, 3, 110, -30), (20, 3, 120, -85)]):
-        body += f'<g class="cloud" style="animation-duration:{dur}s;animation-delay:{delay}s">{sprite(CLOUD, 0, cy, s)}</g>'
-
-    # Hills.
-    def hill(base, amp1, f1, amp2, f2, ph, color, step=10):
-        out = ""
-        for x in range(0, W, step):
-            h = base + amp1 * math.sin(x / f1 + ph) + amp2 * math.sin(x / f2)
-            h = int(h // 5 * 5)
-            out += rect(x, h, step, H - h, color)
-        return out
-
-    body += hill(262, 18, 95, 8, 37, 0.5, "#bcdb9c")
-    body += hill(292, 14, 70, 6, 29, 2.0, "#93c56a")
-    # Ground with a ragged grass edge.
-    gy = 318
-    body += rect(0, gy, W, H - gy, "#5f9b3c")
-    edge = {(cx, 0) for cx in range(W // 5) if rnd.random() < 0.55}
-    body += merge_rects(edge, 5, 0, gy - 5, "#5f9b3c")
-    body += rect(0, 345, W, 15, C["j"])
-    for _ in range(26):
-        fx = rnd.randrange(10, 900)
-        fy = rnd.choice([300, 312, 322, 330])
-        body += sprite(rnd.choice([FLOWER_P, FLOWER_W]), fx, fy, 3)
-
-    # Tree on the right: trunk, canopy and the branch the owl sits on.
-    body += rect(935, 0, 65, H, C["e"])
-    body += rect(950, 0, 30, H, C["b"])
-    for y in range(10, H, 40):
-        body += rect(958, y, 5, 20, C["e"])
-    canopy = [(860, -30, 90), (930, -20, 80), (800, -50, 70), (980, 40, 60)]
-    for cx, cy, r in canopy:
-        for yy in range(cy - r, cy + r, 10):
-            half = int(math.sqrt(max(0, r * r - (yy - cy) ** 2)) // 10 * 10)
-            body += rect(cx - half, yy, half * 2, 10, C["j"])
-    for cx, cy, r in canopy:
-        for yy in range(cy - r, cy + r // 3, 10):
-            half = int(math.sqrt(max(0, (r - 18) ** 2 - (yy - cy + 6) ** 2)) // 10 * 10)
-            if half:
-                body += rect(cx - half - 6, yy, half * 2, 10, C["i"])
-
-    s = 5
-    ox, oy = 735, 150
-    body += sprite(OWL, ox, oy, s)
-    by = oy + 21 * s
-    body += rect(ox + 27 * s, by, 940 - (ox + 27 * s), s, C["e"])
-    body += rect(ox + 25 * s, by + s, 940 - (ox + 25 * s), s, C["h"])
-    body += rect(ox + 25 * s, by + 2 * s, 940 - (ox + 25 * s), s, C["a"])
-    body += f'<g class="blink">{sprite(OWL_BLINK, ox, oy + 7 * s, s)}</g>'
-
-    # Sparkles.
-    for i, (sx, sy) in enumerate([(640, 60), (700, 120), (590, 175), (880, 115), (520, 40)]):
-        body += f'<g class="spark" style="animation-delay:{i * 0.7}s">{sprite(SPARK, sx, sy, 3)}</g>'
-
-    # Text.
-    x = 56
-    body += text("HELLO, I'M", x, 62, 3, C["h"])
-    body += text("NICHO LESCANO", x, 100, 7, C["a"], shadow=C["i"])
-    body += text("UI/UX DESIGNER + DEVELOPER", x, 177, 3, C["j"])
-    body += text("I DESIGN COZY, CLEAR, PLAYFUL APPS", x, 215, 2, C["e"])
-    cx = x + text_width("UI/UX DESIGNER + DEVELOPER", 3) + 8
-    body += f'<rect class="cursor" x="{cx}" y="177" width="12" height="21" fill="{C["j"]}"/>'
+    # Right: a design-tool window with a frame being edited.
+    wx, wy, ww, wh = 630, 52, 316, 236
+    b += (
+        f'<g filter="url(#sh)"><rect x="{wx}" y="{wy}" width="{ww}" height="{wh}" rx="14" '
+        f'fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/></g>'
+    )
+    b += (
+        f'<path d="M{wx} {wy + 14} a14 14 0 0 1 14 -14 H{wx + ww - 14} a14 14 0 0 1 14 14 '
+        f'V{wy + 34} H{wx} Z" fill="#f4eee2"/>'
+    )
+    b += f'<line x1="{wx}" y1="{wy + 34}" x2="{wx + ww}" y2="{wy + 34}" stroke="{LINE}" stroke-width="1.5"/>'
+    for i, col in enumerate(["#e58f7d", "#e9c46a", "#8db577"]):
+        b += f'<circle cx="{wx + 20 + i * 16}" cy="{wy + 17}" r="5" fill="{col}"/>'
+    b += stext("home-screen", wx + ww / 2, wy + 22, 12, MUTED, 600, anchor="middle")
+    # Mock app card inside the window.
+    cx, cy = wx + 24, wy + 52
+    b += f'<rect x="{cx}" y="{cy}" width="190" height="166" rx="12" fill="#ffffff" stroke="{LINE}" stroke-width="1.5"/>'
+    b += f'<rect x="{cx + 12}" y="{cy + 12}" width="166" height="62" rx="8" fill="#e4eeda"/>'
+    b += pix(
+        rect(cx + 12, cy + 56, 166, 18, "#b2cf98")
+        + rect(cx + 30, cy + 50, 50, 6, "#b2cf98")
+        + rect(cx + 100, cy + 46, 46, 10, "#b2cf98")
+        + sprite(SPARKLE, cx + 140, cy + 20, 2)
+    )
+    b += f'<rect x="{cx + 12}" y="{cy + 86}" width="120" height="9" rx="4.5" fill="#d9cfbc"/>'
+    b += f'<rect x="{cx + 12}" y="{cy + 102}" width="86" height="9" rx="4.5" fill="#ebe3d3"/>'
+    bx, by, bw, bh = cx + 12, cy + 124, 96, 26
+    b += f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="13" fill="#e2b04a"/>'
+    b += stext("Get started", bx + bw / 2, by + 17, 11, INK, 700, anchor="middle")
+    sel = "#4c8bf5"
+    b += f'<g class="sel"><rect x="{bx - 5}" y="{by - 5}" width="{bw + 10}" height="{bh + 10}" fill="none" stroke="{sel}" stroke-width="1.5"/>'
+    for hx, hy in [(bx - 5, by - 5), (bx + bw + 5, by - 5), (bx - 5, by + bh + 5), (bx + bw + 5, by + bh + 5)]:
+        b += f'<rect x="{hx - 3.5}" y="{hy - 3.5}" width="7" height="7" fill="#fff" stroke="{sel}" stroke-width="1.5"/>'
+    b += "</g>"
+    b += f'<rect x="{bx + bw + 14}" y="{by + 4}" width="52" height="18" rx="4" fill="{sel}"/>'
+    b += stext("96 × 26", bx + bw + 40, by + 17, 10, "#ffffff", 600, anchor="middle")
+    # Side panel: colour styles.
+    px = wx + 236
+    b += stext("Colors", px, wy + 64, 11, MUTED, 600)
+    for i, col in enumerate(["#2b2118", "#4e7a3a", "#8db577", "#e2b04a", "#b5653e"]):
+        b += f'<rect x="{px}" y="{wy + 76 + i * 28}" width="56" height="20" rx="6" fill="{col}"/>'
+    # Pixel cursor and sparkles.
+    b += f'<g class="cur">{pix(sprite(CURSOR, bx + bw + 2, by + bh + 2, 2, {"a": INK, "c": "#ffffff"}))}</g>'
+    for i, (sx, sy) in enumerate([(590, 70), (580, 236), (960, 318), (530, 36)]):
+        b += f'<g class="tw" style="animation-delay:{i * 0.8}s">{pix(sprite(SPARKLE, sx, sy, 2))}</g>'
 
     style = (
-        ".cloud{animation:drift 80s linear infinite}"
+        ".cloud{animation:drift 100s linear infinite}"
         "@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(1000px)}}"
-        ".blink{opacity:0;animation:blink 5s steps(1) infinite}"
-        "@keyframes blink{0%,90%{opacity:0}92%,96%{opacity:1}98%{opacity:0}}"
-        ".spark{animation:tw 2.8s ease-in-out infinite}"
-        "@keyframes tw{0%,100%{opacity:.15}50%{opacity:1}}"
-        ".cursor{animation:cur 1s steps(1) infinite}"
-        "@keyframes cur{50%{opacity:0}}"
+        ".tw{animation:tw 3s ease-in-out infinite}"
+        "@keyframes tw{0%,100%{opacity:.2}50%{opacity:1}}"
+        ".cur{animation:cur 4s ease-in-out infinite}"
+        "@keyframes cur{0%,100%{transform:translate(0,0)}50%{transform:translate(-6px,-4px)}}"
+        ".sel{animation:sel 4s ease-in-out infinite}"
+        "@keyframes sel{0%,100%{opacity:1}50%{opacity:.55}}"
     )
-    save("banner.svg", svg(W, H, body, style, "Nicho Lescano, UI/UX designer and developer"))
+    save("hero.svg", ssvg(W, H, b, style, "Nicho Lescano, UI/UX designer and developer, based in the Philippines", defs))
 
 
 # ---------------------------------------------------------------- buttons
-def button(name, label, color, fg=C["a"]):
-    s = 2
-    tw = text_width(label, s)
-    W, H = tw + 44, 46
-    body = panel(0, 4, W, H - 4, C["a"])  # shadow
-    body += panel(0, 0, W, H - 6, color)
-    body += rect(5, 5, W - 10, 3, "#ffffff55")
-    body += text(label, (W - tw) // 2, 13, s, fg)
-    save(name, svg(W, H, body, "", label))
+def pill_button(name, label, fill, fg, stroke=None):
+    size = 15
+    tw = est_width(label, size, 700)
+    W, H = int(tw + 70), 48
+    st = f' stroke="{stroke}" stroke-width="1.5"' if stroke else ""
+    b = f'<g filter="url(#sh)"><rect x="6" y="3" width="{W - 12}" height="36" rx="18" fill="{fill}"{st}/></g>'
+    b += stext(label, 26, 26, size, fg, 700)
+    ax = W - 34
+    b += (
+        f'<path d="M{ax} 21 h10 m-4 -4 l4 4 l-4 4" stroke="{fg}" stroke-width="2" fill="none" '
+        f'stroke-linecap="round" stroke-linejoin="round"/>'
+    )
+    save(name, ssvg(W, H, b, "", label, SHADOW))
 
 
-# ---------------------------------------------------------------- plaque
-def plaque(name, label):
+# ---------------------------------------------------------------- section heading
+def heading(name, label):
     s = 3
     tw = text_width(label, s)
-    W, H = tw + 110, 62
-    body = ""
-    # Hanging ropes.
-    body += rect(30, 0, 5, 10, C["e"]) + rect(W - 35, 0, 5, 10, C["e"])
-    body += panel(0, 8, W, H - 8, C["h"])
-    body += rect(5, 13, W - 10, 4, C["t"])
-    body += rect(5, H - 9, W - 10, 4, C["b"])
-    for nx in (14, W - 19):
-        body += rect(nx, 28, 5, 5, C["a"])
-    body += sprite(SPROUT, 26, 22, 3)
-    body += text(label, 62, 26, s, C["c"], shadow=C["e"])
-    save(name, svg(W, H, body, "", label))
+    W, H = tw + 96, 56
+    b = f'<rect x="1" y="5" width="{W - 2}" height="46" rx="23" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+    b += pix(sprite(SPARKLE, 24, 18, 3) + text(label, 62, 18, s, INK))
+    save(name, ssvg(W, H, b, "", label.title()))
 
 
-# ---------------------------------------------------------------- player card
-def player_card():
-    W, H = 1000, 330
-    body = panel(0, 0, W, H, C["a"])
-    body += panel(5, 5, W - 10, H - 10, PAPER, C["h"])
-    # Title bar, like a game dialog window.
-    body += rect(10, 10, W - 20, 40, C["h"])
-    body += rect(10, 10, W - 20, 4, C["t"])
-    body += rect(10, 50, W - 20, 5, C["a"])
-    body += text("PLAYER PROFILE", 26, 23, 2, C["c"], shadow=C["e"])
-    for i, col in enumerate([C["i"], C["d"], C["l"]]):
-        body += panel(W - 100 + i * 26, 20, 20, 20, col)
-
-    # Portrait.
-    px, py = 40, 78
-    body += panel(px, py, 210, 190, MINT)
-    owl_top = [row[5:29] for row in OWL[:20]]
-    body += sprite(owl_top, px + (210 - 24 * 7) // 2, py + 22, 7)
-    body += f'<g class="blink">{sprite([r[5:29] for r in OWL_BLINK], px + (210 - 24 * 7) // 2, py + 22 + 7 * 7, 7)}</g>'
-    body += panel(px + 25, py + 170, 160, 34, C["d"])
-    body += text("NICHO", px + 25 + (160 - text_width("NICHO", 2)) // 2, py + 180, 2, C["a"])
-
-    # Stats.
-    x = 290
-    body += text("NICHO LESCANO", x, 80, 4, C["a"], shadow=C["i"])
-    rows = [
-        ("CLASS", "DESIGNER + DEV"),
-        ("BASE", "PHILIPPINES"),
-        ("QUEST", "COZY, CLEAR UI"),
-        ("NOW", "THREE.JS + AI"),
-    ]
-    for i, (k, v) in enumerate(rows):
-        y = 135 + i * 30
-        body += text(k, x, y, 2, C["h"])
-        body += text(v, x + 84, y, 2, C["a"])
-
-    # Skill bars.
-    bx = 640
-    body += text("SKILLS", bx, 102, 2, C["j"])
-    skills = [("DESIGN", 9), ("MOBILE", 7), ("DESKTOP", 7), ("WEB", 8)]
-    for i, (k, v) in enumerate(skills):
-        y = 135 + i * 30
-        body += text(k, bx, y, 2, C["a"])
-        sx = bx + 104
-        body += panel(sx, y - 4, 10 * 20 + 10, 22, C["s"])
-        for j in range(10):
-            if j < v:
-                d = round(0.4 + i * 0.25 + j * 0.08, 2)
-                body += (
-                    f'<g class="seg" style="animation-delay:{d}s">'
-                    + rect(sx + 5 + j * 20, y + 1, 18, 12, C["i"])
-                    + rect(sx + 5 + j * 20, y + 1, 18, 3, "#b6db8f")
-                    + "</g>"
-                )
-
-    # Dialog line.
-    body += rect(290, 262, 670, 4, C["s"])
-    body += text("> SCROLL DOWN TO SEE MY WORK", 290, 284, 2, C["e"])
-    body += f'<g class="arrow">{sprite(["aaaaa", ".aaa.", "..a.."], 290 + text_width("> SCROLL DOWN TO SEE MY WORK", 2) + 12, 286, 3)}</g>'
-
-    style = (
-        ".blink{opacity:0;animation:blink 6s steps(1) infinite}"
-        "@keyframes blink{0%,90%{opacity:0}92%,96%{opacity:1}98%{opacity:0}}"
-        ".seg{animation:pop .25s steps(2) backwards}"
-        "@keyframes pop{from{opacity:0}}"
-        ".arrow{animation:bob 1s steps(2) infinite}"
-        "@keyframes bob{50%{transform:translateY(4px)}}"
+# ---------------------------------------------------------------- about
+def about():
+    W, H = 1000, 320
+    b = (
+        f'<g filter="url(#sh)"><rect x="8" y="4" width="{W - 16}" height="{H - 20}" rx="20" '
+        f'fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/></g>'
     )
-    save("about.svg", svg(W, H, body, style, "Player profile: Nicho Lescano"))
+    x = 52
+    b += stext("ABOUT ME", x, 58, 12, "#4e7a3a", 700, spacing=1.6)
+    b += stext("Designer first, developer second.", x, 96, 27, INK, 700)
+    para = [
+        "I'm an IT student from the Philippines who likes",
+        "turning ideas into interfaces that feel calm, clear",
+        "and a little playful. I take projects from the first",
+        "Figma frame all the way to a working app.",
+    ]
+    for i, line in enumerate(para):
+        b += stext(line, x, 138 + i * 27, 17, BODY)
+    b += pix(sprite(SPARKLE, x, 256, 2))
+    b += stext("Always learning, always sketching", x + 24, 268, 15, MUTED, 600)
+
+    rows = [
+        ("Design", "Figma, Illustrator, prototyping", "pencil", "clay"),
+        ("Build", "Flutter, .NET, Laravel, JavaScript", "code", "green"),
+        ("Exploring", "Three.js and AI features", "spark", "gold"),
+    ]
+    rx = 560
+    for i, (title, sub, icon, acc) in enumerate(rows):
+        y = 40 + i * 80
+        fg, tint = ACCENTS[acc]
+        b += f'<rect x="{rx}" y="{y}" width="392" height="66" rx="14" fill="{CREAM}" stroke="{LINE}" stroke-width="1.5"/>'
+        b += f'<rect x="{rx + 12}" y="{y + 11}" width="44" height="44" rx="11" fill="{tint}"/>'
+        if icon == "pencil":
+            b += pix(sprite(PENCIL, rx + 22, y + 23, 2, C))
+        elif icon == "code":
+            b += pix(text("</>", rx + 34 - text_width("</>", 2) // 2, y + 26, 2, fg))
+        else:
+            b += pix(sprite(SPARKLE, rx + 23, y + 22, 3))
+        b += stext(title, rx + 72, y + 29, 17, INK, 700)
+        b += stext(sub, rx + 72, y + 50, 14, MUTED, 500)
+    save("about.svg", ssvg(W, H, b, "", "About me: designer first, developer second", SHADOW))
 
 
 # ---------------------------------------------------------------- project card
-def wrap(t, n):
-    words, lines, cur = t.split(), [], ""
-    for w in words:
-        if len(cur) + len(w) + (1 if cur else 0) > n:
-            lines.append(cur)
-            cur = w
-        else:
-            cur = f"{cur} {w}" if cur else w
-    lines.append(cur)
-    return lines
-
-
-def card(name, title, kind, desc, tags, icon, accent, button_label="VIEW"):
-    # Sized so the README shows it at about 1:1, keeping the 2x text crisp.
-    W, H = 360, 276
-    body = panel(0, 6, W, H - 6, C["a"])  # drop shadow
-    body += panel(0, 0, W, H - 6, PAPER)
-    body += rect(5, 5, W - 10, 8, accent)
-
-    body += panel(18, 28, 68, 68, MINT)
-    body += sprite(ICONS[icon], 28, 38, 4)
-
-    body += text(title, 100, 36, 3, C["a"])
-    body += text(kind, 100, 70, 2, accent)
-
-    for i, line in enumerate(wrap(desc, 26)[:4]):
-        body += text(line, 20, 116 + i * 22, 2, C["e"])
-
-    y = 214
-    x = 18
+def card(name, title, kind, desc, tags, icon, acc):
+    W, H = 480, 250
+    fg, tint = ACCENTS[acc]
+    b = (
+        f'<g filter="url(#sh)"><rect x="8" y="4" width="{W - 16}" height="{H - 20}" rx="18" '
+        f'fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/></g>'
+    )
+    b += f'<rect x="32" y="28" width="60" height="60" rx="14" fill="{tint}"/>'
+    b += pix(sprite(ICONS[icon], 38, 34, 4))
+    b += stext(title, 108, 56, 22, INK, 700)
+    b += stext(kind.upper(), 108, 79, 11, fg, 700, spacing=1.4)
+    for i, line in enumerate(wrap(desc, 50)[:3]):
+        b += stext(line, 32, 124 + i * 23, 15.5, BODY)
+    x = 32
     for t in tags:
-        tw = text_width(t, 2)
-        body += panel(x, y, tw + 20, 30, MINT if accent == C["j"] else C["s"])
-        body += text(t, x + 10, y + 8, 2, C["a"])
-        x += tw + 26
-
-    # "Go" button.
-    bw = 44
-    bx = W - bw - 18
-    body += panel(bx, y + 4, bw, 32, C["a"])
-    body += panel(bx, y - 2, bw, 32, C["d"])
-    body += rect(bx + 5, y + 3, bw - 10, 3, "#fff3c4")
-    body += sprite(["a...", "aa..", "aaa.", "aaaa", "aaa.", "aa..", "a..."], bx + 16, y + 5, 2)
-    save(name, svg(W, H, body, "", f"{title}: {desc.lower()}"))
+        tw = est_width(t, 12, 700) + 22
+        b += f'<rect x="{x}" y="186" width="{tw:.0f}" height="26" rx="13" fill="{tint}"/>'
+        b += stext(t, x + tw / 2, 203, 12, fg, 700, anchor="middle")
+        x += tw + 8
+    cx, cy = W - 54, 199
+    b += f'<circle cx="{cx}" cy="{cy}" r="18" fill="{INK}"/>'
+    b += (
+        f'<path d="M{cx - 6} {cy} h12 m-5 -5 l5 5 l-5 5" stroke="#fff" stroke-width="2" fill="none" '
+        f'stroke-linecap="round" stroke-linejoin="round"/>'
+    )
+    save(name, ssvg(W, H, b, "", f"{title}: {desc}", SHADOW))
 
 
 # ---------------------------------------------------------------- footer
 def footer():
-    W, H = 1000, 150
-    rnd = random.Random(3)
-    body = ""
-    msg = "THANKS FOR STOPPING BY!"
-    tw = text_width(msg, 2)
-    sx = 60
-    body += rect(sx + 20, 30, 5, 70, C["e"]) + rect(sx + tw + 10, 30, 5, 70, C["e"])
-    body += panel(sx, 4, tw + 36, 40, C["h"])
-    body += rect(sx + 5, 9, tw + 26, 3, C["t"])
-    body += text(msg, sx + 18, 17, 2, C["c"], shadow=C["e"])
-    gy = 100
-    body += rect(0, gy, W, H - gy, "#5f9b3c")
-    edge = {(cx, 0) for cx in range(W // 5) if rnd.random() < 0.55}
-    body += merge_rects(edge, 5, 0, gy - 5, "#5f9b3c")
-    body += rect(0, 130, W, 20, C["j"])
-    for i, x in enumerate(range(40, W, 90)):
-        d = round(i * 0.3, 1)
-        body += f'<g class="sway" style="animation-delay:{d}s">{sprite(SPROUT, x, gy - 21 - 6, 4)}</g>'
-    for _ in range(18):
-        body += sprite(rnd.choice([FLOWER_P, FLOWER_W]), rnd.randrange(10, 980), rnd.choice([104, 114]), 3)
-    owl_small = [row[5:29] for row in OWL[:21]]
-    body += sprite(owl_small, (W - 24 * 3) // 2, gy - 63 + 2, 3)
-    style = (
-        ".sway{animation:sway 2.4s steps(2) infinite}"
-        "@keyframes sway{50%{transform:translateY(-4px)}}"
-    )
-    save("footer.svg", svg(W, H, body, style, "Thanks for stopping by"))
+    W, H = 1000, 130
+    defs = '<clipPath id="r"><rect width="1000" height="130" rx="24"/></clipPath>'
+    b = '<g clip-path="url(#r)">'
+    b += '<path d="M0 40 C 200 10, 380 40, 560 28 S 860 10, 1000 30 V 130 H 0 Z" fill="#b2cf98"/>'
+    b += '<path d="M0 62 C 240 46, 520 70, 1000 52 V 130 H 0 Z" fill="#4e7a3a"/>'
+    b += "</g>"
+    b += stext("Thanks for stopping by. Let's make something nice together.", W / 2, 104, 18, "#fbf6ec", 600, anchor="middle")
+    for i, (sx, sy) in enumerate([(150, 70), (840, 74), (300, 30), (700, 22)]):
+        b += f'<g class="tw" style="animation-delay:{i * 0.7}s">{pix(sprite(SPARKLE, sx, sy, 2))}</g>'
+    style = ".tw{animation:tw 3s ease-in-out infinite}@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}"
+    save("footer.svg", ssvg(W, H, b, style, "Thanks for stopping by", defs))
 
 
 if __name__ == "__main__":
+    if os.path.isdir(OUT):
+        for f in os.listdir(OUT):
+            if f.endswith(".svg"):
+                os.remove(os.path.join(OUT, f))
     print("writing assets:")
-    banner()
-    player_card()
+    hero()
+    about()
     footer()
-    for f, label in [
-        ("plaque-projects.svg", "FEATURED PROJECTS"),
-        ("plaque-toolkit.svg", "TOOLKIT"),
-        ("plaque-stats.svg", "GITHUB STATS"),
-    ]:
-        plaque(f, label)
-    button("btn-portfolio.svg", "PORTFOLIO", C["d"])
-    button("btn-email.svg", "EMAIL ME", C["i"])
-    button("btn-kuwago.svg", "PLAY KUWAGO", C["t"])
+    pill_button("btn-portfolio.svg", "View portfolio", INK, "#fbf6ec")
+    pill_button("btn-email.svg", "Email me", CARD, INK, stroke=LINE)
+    heading("h-projects.svg", "FEATURED PROJECTS")
+    heading("h-toolkit.svg", "TOOLKIT")
+    heading("h-stats.svg", "GITHUB STATS")
 
-    card("card-kuwago.svg", "KUWAGO", "MOBILE APP",
-         "A COZY PIXEL STUDY GARDEN. FOCUS TO GROW PLANTS, THEN QUIZ YOURSELF WITH AI.",
-         ["FLUTTER", "FIREBASE"], "sprout", C["j"])
-    card("card-xpera.svg", "XPERA CRM", "DESKTOP APP",
-         "A CRM FOR GAMING PC PARTS STORES, WITH ONE PRIVATE DATABASE PER STORE.",
-         ["C#", ".NET", "SQL"], "gamepad", C["n"])
-    card("card-nichodev.svg", "NICHO.DEV", "PORTFOLIO SITE",
-         "MY PORTFOLIO, WITH A 3D ROOM AND A WORKING LAPTOP INSIDE IT.",
-         ["JS", "THREE.JS"], "monitor", C["h"])
-    card("card-cinematheque.svg", "CINEMATHEQUE", "WEB APP",
-         "A CINEMA WEB APP BUILT WITH LARAVEL AND BLADE.",
-         ["LARAVEL", "PHP"], "film", C["l"])
-    card("card-sagap.svg", "SAGAP", "MOBILE APP",
-         "A MOBILE APP THAT MAPS WI-FI DEAD ZONES.",
-         ["FLUTTER", "DART"], "wifi", C["j"])
-    card("card-payroller.svg", "PAYROLLER", "DESKTOP APP",
-         "A PAYROLL SYSTEM: EMPLOYEES, AUTOMATIC PAY AND PAYROLL HISTORY.",
-         ["PYTHON", "PYQT6"], "coin", C["g"])
+    card("card-kuwago.svg", "kuwaGO", "Mobile app",
+         "A cozy pixel-art study garden. Focus to grow plants, then quiz yourself with AI made from your notes.",
+         ["Flutter", "Firebase", "Gemini"], "sprout", "green")
+    card("card-xpera.svg", "xpera CRM", "Desktop app",
+         "A CRM for gaming PC parts stores: customers, sales and payments, with one private database per store.",
+         ["C#", ".NET", "SQL Server"], "gamepad", "navy")
+    card("card-nichodev.svg", "Nicho.dev", "Portfolio site",
+         "My portfolio, with layered project stacks and a 3D room where the laptop has a working desktop.",
+         ["JavaScript", "Three.js"], "monitor", "clay")
+    card("card-cinematheque.svg", "Cinematheque", "Web app",
+         "A cinema web app built with Laravel and Blade.",
+         ["Laravel", "PHP", "MySQL"], "film", "brick")
+    card("card-sagap.svg", "sagap", "Mobile app",
+         "A mobile app that maps Wi-Fi dead zones.",
+         ["Flutter", "Dart"], "wifi", "teal")
+    card("card-payroller.svg", "PayRoller", "Desktop app",
+         "A payroll system with employee records, automatic pay computation and payroll history.",
+         ["Python", "PyQt6", "SQLite"], "coin", "gold")
