@@ -556,7 +556,7 @@ def skills(theme):
         b += t(area, x + 40, y + 29, 16, c["text"], 700)
         b += t(tools, x + 40, y + 51, 14, c["muted"])
         b += "</g>"
-    framed("skills", theme, 1000, W, H, b, FADE_UP, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
+    framed("skills-grid", theme, 1000, W, H, b, FADE_UP, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
 
 
 # ---------------------------------------------------------------- certificates
@@ -656,16 +656,16 @@ if __name__ == "__main__":
     print("writing assets:")
     for th in THEMES:
         hero(th)
-        label("label-now", "01", "Now", "What I am up to", th)
-        label("label-work", "02", "Selected work", "Fig. 01–06", th)
-        label("label-skills", "03", "Skills", "What I build with", th)
+        label("section-now", "01", "Now", "What I am up to", th)
+        label("section-work", "02", "Selected work", "Fig. 01–06", th)
+        label("section-skills", "03", "Skills", "What I build with", th)
         now(th)
         footer(th)
         nav("nav-portfolio", "Portfolio", "nicho-dev.vercel.app", "Case studies, 3D room", th)
         nav("nav-email", "Direct line", "Email me", "neckolescano36@gmail.com", th)
         nav("nav-kuwago", "Live app", "kuwaGO", "Early access", th)
         nav("nav-resume", "Resume", "Download PDF", "From nicho-dev.vercel.app", th)
-        label("label-certs", "04", "Certificates", "3 earned", th)
+        label("section-certs", "04", "Certificates", "3 earned", th)
         certificates(th)
         for p in PROJECTS:
             card(p, th)

@@ -11,13 +11,13 @@
 
 <br />
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/label-now-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/label-now-light.svg" /><img src="./assets/label-now-light.svg" width="100%" alt="01 Now" /></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/section-now-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/section-now-light.svg" /><img src="./assets/section-now-light.svg" width="100%" alt="01 Now" /></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="./assets/now-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/now-light.svg" /><img src="./assets/now-light.svg" width="100%" alt="Now: building xpera CRM, shipping kuwaGO, learning machine learning, studying BS IT at the University of Mindanao." /></picture>
 
 <br />
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/label-work-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/label-work-light.svg" /><img src="./assets/label-work-light.svg" width="100%" alt="02 Selected work" /></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/section-work-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/section-work-light.svg" /><img src="./assets/section-work-light.svg" width="100%" alt="02 Selected work" /></picture>
 
 <p align="center">
   <a href="https://github.com/neckolescano/kuwaGO"><picture><source media="(prefers-color-scheme: dark)" srcset="./assets/card-kuwago-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/card-kuwago-light.svg" /><img src="./assets/card-kuwago-light.svg" width="48.5%" alt="Fig. 01 kuwaGO, mobile app, early access. A cozy study garden: focus and your plant grows. Flutter, Firebase, Gemini. 30 days to ship, 18 testers, 72 tests." /></picture></a>
@@ -55,13 +55,13 @@
 
 <div align="center">
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/label-skills-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/label-skills-light.svg" /><img src="./assets/label-skills-light.svg" width="100%" alt="03 Skills" /></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/section-skills-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/section-skills-light.svg" /><img src="./assets/section-skills-light.svg" width="100%" alt="03 Skills" /></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/skills-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/skills-light.svg" /><img src="./assets/skills-light.svg" width="100%" alt="Design: Figma, UI/UX, brand and logo, prototyping. Web: Laravel, PHP, JavaScript, REST APIs. Mobile: Flutter, Dart, Firebase. Desktop: C#, .NET WinForms, ASP.NET API. Data: MySQL, SQL Server, EF Core. AI and ML: machine learning, AI automation, Gemini." /></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/skills-grid-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/skills-grid-light.svg" /><img src="./assets/skills-grid-light.svg" width="100%" alt="Design: Figma, UI/UX, brand and logo, prototyping. Web: Laravel, PHP, JavaScript, REST APIs. Mobile: Flutter, Dart, Firebase. Desktop: C#, .NET WinForms, ASP.NET API. Data: MySQL, SQL Server, EF Core. AI and ML: machine learning, AI automation, Gemini." /></picture>
 
 <br />
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/label-certs-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/label-certs-light.svg" /><img src="./assets/label-certs-light.svg" width="100%" alt="04 Certificates" /></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="./assets/section-certs-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/section-certs-light.svg" /><img src="./assets/section-certs-light.svg" width="100%" alt="04 Certificates" /></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="./assets/certificates-dark.svg" /><source media="(prefers-color-scheme: light)" srcset="./assets/certificates-light.svg" /><img src="./assets/certificates-light.svg" width="100%" alt="Certificates: IT Specialist (Certiport, Pearson) in HTML and CSS (May 20, 2026), Databases (May 13, 2026) and Java (March 12, 2025)." /></picture>
 
