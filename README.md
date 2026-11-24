@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg" />
-  <img src="assets/hero-light.svg" width="100%" alt="Nicho Lescano. UI/UX designer and developer, also into machine learning and AI automation. I draw every project first, then build it, layer by layer. Based in Davao City, Philippines." />
+  <img src="assets/hero-light.svg" width="100%" alt="Nicho Lescano. UI/UX designer and developer, also into machine learning and AI automation. I draw every project first, then build it, layer by layer. 3 systems shipped, 201 automated tests, 18 real testers, 30 days to ship kuwaGO." />
 </picture>
 
 [Portfolio](https://nicho-dev.vercel.app) &nbsp;·&nbsp; [Email](mailto:neckolescano36@gmail.com) &nbsp;·&nbsp; [kuwaGO](https://neckolescano.github.io/kuwaGO/)
@@ -31,47 +31,14 @@
   </picture>
 </a>
 
-Also: [Nicho.dev](https://github.com/neckolescano/Nicho.dev), my portfolio with a 3D room &nbsp;·&nbsp; [sagap](https://github.com/neckolescano/sagap), a Wi-Fi dead zone mapper &nbsp;·&nbsp; [PayRoller](https://github.com/neckolescano/IT5-payroller), a payroll system in PyQt6
-
-<br />
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/label-process-dark.svg" />
-  <img src="assets/label-process-light.svg" width="100%" alt="02 How I work" />
-</picture>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/process-dark.svg" />
-  <img src="assets/process-light.svg" width="100%" alt="Brief, sketch, wireframe, design, build and ship." />
-</picture>
-
-<br />
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/label-numbers-dark.svg" />
-  <img src="assets/label-numbers-light.svg" width="100%" alt="03 By the numbers" />
-</picture>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/numbers-dark.svg" />
-  <img src="assets/numbers-light.svg" width="100%" alt="3 systems shipped, 201 automated tests, 18 real testers, 30 days to ship kuwaGO." />
-</picture>
-
 <br />
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/label-skills-dark.svg" />
-  <img src="assets/label-skills-light.svg" width="100%" alt="04 Skills" />
+  <img src="assets/label-skills-light.svg" width="100%" alt="02 Skills" />
 </picture>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/skills-dark.svg" />
-  <img src="assets/skills-light.svg" width="100%" alt="Design: Figma, UI/UX, brand and logo. Web: Laravel, PHP, JavaScript. Mobile: Flutter, Dart, Firebase. Desktop: C#, .NET. Data: MySQL, SQL Server, EF Core. AI and ML: machine learning, AI automation, Gemini. Tools: Git, Cloudflare Workers." />
-</picture>
-
-<br />
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/closing-dark.svg" />
-  <img src="assets/closing-light.svg" width="100%" alt="Draw it first. Then build it, layer by layer." />
+  <img src="assets/skills-light.svg" width="100%" alt="Design: Figma, UI/UX, brand and logo, prototyping. Web: Laravel, PHP, JavaScript, REST APIs. Mobile: Flutter, Dart, Firebase. Desktop: C#, .NET WinForms, ASP.NET API. Data: MySQL, SQL Server, EF Core. AI and ML: machine learning, AI automation, Gemini." />
 </picture>
