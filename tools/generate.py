@@ -19,14 +19,14 @@ EASE_IO = "cubic-bezier(.65,0,.35,1)"
 
 THEMES = {
     "dark": dict(
-        text="#f4efe6", body="#c9c4bb", muted="#8b8781", faint="#5b5852",
+        page="#0d1117", text="#f4efe6", body="#c9c4bb", muted="#8b8781", faint="#5b5852",
         line="rgba(244,239,230,0.14)", line2="rgba(244,239,230,0.28)",
         accent="#e2763f", gold="#c9a227", green="#7cc47f",
         plane="#16181d", plane2="#1c1f25", wire="rgba(244,239,230,0.22)", block="rgba(244,239,230,0.10)",
         glow="#7cc47f", glow_op="0.35",
     ),
     "light": dict(
-        text="#141414", body="#3d3b38", muted="#6b6862", faint="#a19d96",
+        page="#ffffff", text="#141414", body="#3d3b38", muted="#6b6862", faint="#a19d96",
         line="rgba(20,20,20,0.12)", line2="rgba(20,20,20,0.26)",
         accent="#cf5f28", gold="#a8861a", green="#3f8f4a",
         plane="#ffffff", plane2="#faf8f4", wire="rgba(20,20,20,0.22)", block="rgba(20,20,20,0.07)",
@@ -182,25 +182,32 @@ def art_xpera(c, x0, y0):
 
 PROJECTS = [
     dict(
-        file="work-kuwago", fig="Fig. 01 / Mobile app", name="kuwaGO",
+        file="card-kuwago", fig="Fig. 01 / Mobile app", size="390 × 844", name="kuwaGO",
         desc="A cozy study garden: focus and your plant grows, give up and it wilts. AI turns your notes into quizzes.",
         stack="Flutter · Firebase · Gemini · Cloudflare Workers",
         proof=[("30", "days to ship"), ("18", "testers"), ("72", "tests")],
         art=art_kuwago,
     ),
     dict(
-        file="work-cinematheque", fig="Fig. 02 / Web system", name="Cinematheque",
+        file="card-cinematheque", fig="Fig. 02 / Web system", size="1440 × 900", name="Cinematheque",
         desc="Ticketing for a real cinema. Moviegoers pick exact seats, pay online and get an e-ticket; staff run schedules and reports.",
         stack="Laravel 12 · MySQL · PayMongo · Blade",
         proof=[("129", "tests"), ("3", "person team"), ("1", "real client")],
         art=art_cinema,
     ),
     dict(
-        file="work-xpera", fig="Fig. 03 / Desktop system", name="xpera CRM",
+        file="card-xpera", fig="Fig. 03 / Desktop system", size="1600 × 945", name="xpera CRM",
         desc="A customer system for stores that sell gaming PC parts: who each customer is, what they buy, owe and need.",
         stack="C# · .NET WinForms · SQL Server · EF Core",
         proof=[("15", "use cases"), ("4", "user roles"), ("1", "database per store")],
-        art=art_xpera,
+        art=art_xpera, art_h=200,
+    ),
+    dict(
+        file="card-nichodev", fig="Fig. 04 / Portfolio site", size="1440 × 900",
+        desc="My portfolio. Layered project stacks, case studies, and a 3D room you can walk into, with a working laptop desktop.",
+        stack="HTML · CSS · JavaScript · Three.js",
+        proof=[("3", "case studies"), ("1", "3D room")],
+        art=None,
     ),
 ]
 
@@ -318,7 +325,7 @@ def hero(theme):
         '<filter id="glow" x="-30%" y="-30%" width="160%" height="170%">'
         f'<feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="{c["glow"]}" flood-opacity="{c["glow_op"]}"/></filter>'
     )
-    save("hero", theme, svg(W, H, b, style, "Nicho Lescano, UI/UX designer and developer in Davao City. 3 systems shipped, 201 automated tests, 18 real testers.", defs))
+    framed("hero", theme, 1000, W, H, b, style, "Nicho Lescano, UI/UX designer and developer in Davao City. 3 systems shipped, 201 automated tests, 18 real testers.", defs, "nicho.dev / profile", "Design · Code · AI")
 
 
 # ---------------------------------------------------------------- section label
@@ -335,26 +342,112 @@ def label(name, num, title, right, theme):
     save(name, theme, svg(W, H, b, style, f"{num} {title}"))
 
 
-# ---------------------------------------------------------------- project rows
-def work(p, theme):
+# ---------------------------------------------------------------- wireframe frames
+def frame(W, H, left, right, c, top=24):
+    """A design-tool frame: name above, hairline outline, small corner handles."""
+    s = mono(left, 2, 13, c["muted"], 10.5, weight=600)
+    if right:
+        s += mono(right, W - 2, 13, c["faint"], 10.5, anchor="end")
+    s += f'<rect x="1" y="{top}" width="{W - 2}" height="{H - top - 1}" rx="2" stroke="{c["line2"]}"/>'
+    for hx, hy in [(1, top), (W - 1, top), (1, H - 1), (W - 1, H - 1)]:
+        s += f'<rect x="{hx - 3.5}" y="{hy - 3.5}" width="7" height="7" fill="{c["page"]}" stroke="{c["muted"]}"/>'
+    return s
+
+
+def dots(id_, c):
+    return (
+        f'<pattern id="{id_}" width="14" height="14" patternUnits="userSpaceOnUse">'
+        f'<circle cx="7" cy="7" r="0.9" fill="{c["faint"]}" fill-opacity="0.55"/></pattern>'
+    )
+
+
+def framed(name, theme, W, inner_w, inner_h, body, style, title, defs, left, right, pad=28, top=24):
+    """Wraps existing artwork in a frame, scaled to fit the inside."""
     c = THEMES[theme]
-    W, H = 1000, 220
-    b = ""
-    b += f'<g class="fu">{mono(p["fig"], 0, 34, c["accent"], 11.5)}</g>'
-    b += f'<g class="fu" style="animation-delay:.06s">{t(p["name"], -1, 74, 32, c["text"], 800, ls=-1)}</g>'
-    for i, line in enumerate(wrap(p["desc"], 62)[:2]):
-        b += f'<g class="fu" style="animation-delay:{.12 + i * .05:.2f}s">{t(line, 0, 108 + i * 24, 16, c["body"])}</g>'
-    b += f'<g class="fu" style="animation-delay:.24s">{mono(p["stack"], 0, 170, c["muted"], 10.5)}</g>'
-    x = 0
-    for n, lab in p["proof"]:
-        b += t(n, x, 200, 17, c["text"], 800)
-        nw = len(n) * 10.5 + 6
-        b += mono(lab, x + nw, 199, c["muted"], 10)
-        x += nw + len(lab) * 7.9 + 24
+    sc = (W - 2 * pad) / inner_w
+    H = int(top + pad + inner_h * sc + pad * 0.7)
+    b = frame(W, H, left, right, c, top)
+    b += f'<g transform="translate({pad} {top + pad * 0.8:.0f}) scale({sc:.4f})">{body}</g>'
+    save(name, theme, svg(W, H, b, style, title, defs))
+
+
+# ---------------------------------------------------------------- nav buttons
+def nav(name, kind, label_, sub, theme):
+    c = THEMES[theme]
+    W, H = 320, 78
+    b = frame(W, H, kind, "", c, top=20)
+    b += t(label_, 18, 52, 17, c["text"], 700)
+    b += mono(sub, 18, 68, c["muted"], 9.5)
+    b += (
+        f'<path class="ar" d="M{W - 34} 52 l10 -10 m-7 0 h7 v7" stroke="{c["accent"]}" stroke-width="1.8" '
+        f'stroke-linecap="round" stroke-linejoin="round"/>'
+    )
+    style = f".ar{{animation:ar 3s {EASE_IO} infinite}}@keyframes ar{{50%{{transform:translate(2px,-2px)}}}}"
+    save(name, theme, svg(W, H, b, style, f"{label_}: {sub}"))
+
+
+# ---------------------------------------------------------------- project art: nicho.dev
+def art_nichodev(c, x0, y0):
+    s = ""
+    w, h = 330, 214
+    s += f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="12" stroke="{c["line2"]}" fill="{c["plane"]}" fill-opacity="0.35"/>'
+    s += f'<path d="M{x0} {y0 + 24} H{x0 + w}" stroke="{c["line"]}"/>'
+    for i in range(3):
+        s += f'<circle cx="{x0 + 16 + i * 12}" cy="{y0 + 12}" r="3.5" fill="{c["block"]}"/>'
+    s += f'<rect x="{x0 + 70}" y="{y0 + 7}" width="190" height="10" rx="5" fill="{c["block"]}"/>'
+    # A small isometric room: floor, two walls, a desk and a glowing laptop.
+    cx, cy = x0 + w / 2, y0 + 120
+    k = 0.5
+    def iso(px, py, pz=0):
+        return cx + (px - py) * 0.866, cy + (px + py) * 0.5 * k * 2 - pz
+    def poly(pts, **kw):
+        d = " ".join(f"{a:.1f},{b_:.1f}" for a, b_ in pts)
+        attrs = " ".join(f'{k_.replace("_", "-")}="{v}"' for k_, v in kw.items())
+        return f'<polygon points="{d}" {attrs}/>'
+    R = 70
+    s += poly([iso(0, 0), iso(R, 0), iso(R, R), iso(0, R)], fill=c["block"], stroke=c["wire"])
+    s += poly([iso(0, 0), iso(R, 0), iso(R, 0, 70), iso(0, 0, 70)], fill=c["plane"], fill_opacity="0.6", stroke=c["wire"])
+    s += poly([iso(0, 0), iso(0, R), iso(0, R, 70), iso(0, 0, 70)], fill=c["plane"], fill_opacity="0.4", stroke=c["wire"])
+    # window on the left wall
+    s += poly([iso(0, 18, 50), iso(0, 44, 50), iso(0, 44, 28), iso(0, 18, 28)], stroke=c["line2"], fill=c["block"])
+    # desk
+    s += poly([iso(22, 30, 22), iso(52, 30, 22), iso(52, 50, 22), iso(22, 50, 22)], fill=c["wire"], stroke=c["line2"])
+    # laptop screen
+    s += f'<g class="glow">{poly([iso(30, 34, 22), iso(46, 34, 22), iso(46, 34, 36), iso(30, 34, 36)], fill=c["accent"])}</g>'
+    style = (
+        f".glow{{animation:glow 4s {EASE_IO} infinite}}"
+        "@keyframes glow{0%,100%{opacity:.45}50%{opacity:1}}"
+    )
+    return s, style
+
+
+# ---------------------------------------------------------------- project card
+def card(p, theme):
+    c = THEMES[theme]
+    W, H = 490, 456
+    top = 22
+    b = frame(W, H, p["fig"], p["size"], c, top)
+    # Canvas area with a dot grid, holding the animated mockup.
+    ax, ay, aw, ah = 16, top + 15, W - 32, 196
+    b += f'<rect x="{ax}" y="{ay}" width="{aw}" height="{ah}" rx="2" fill="url(#dg)"/>'
     art, astyle = p["art"](c, 0, 0)
-    b += f'<g class="fu" style="animation-delay:.15s"><g transform="translate(676 10) scale(0.72)">{art}</g></g>'
-    b += f'<rect x="0" y="{H - 1}" width="{W}" height="1" fill="{c["line"]}"/>'
-    save(p["file"], theme, svg(W, H, b, FADE_UP + astyle, f'{p["name"]}: {p["desc"]}'))
+    sc = 0.74
+    bw, bh = p.get("art_w", 330) * sc, p.get("art_h", 214) * sc
+    b += f'<g class="fu" style="animation-delay:.1s"><g transform="translate({ax + (aw - bw) / 2:.0f} {ay + (ah - bh) / 2 + 4:.0f}) scale({sc})">{art}</g></g>'
+    b += f'<rect x="16" y="{ay + ah + 14}" width="{W - 32}" height="1" fill="{c["line"]}"/>'
+    y = ay + ah + 46
+    b += f'<g class="fu" style="animation-delay:.15s">{t(p["name"], 15, y, 26, c["text"], 800, ls=-0.8)}</g>'
+    for i, line in enumerate(wrap(p["desc"], 56)[:3]):
+        b += f'<g class="fu" style="animation-delay:{.2 + i * .04:.2f}s">{t(line, 16, y + 28 + i * 21, 14.5, c["body"])}</g>'
+    b += mono(p["stack"], 16, H - 44, c["muted"], 9.5)
+    x = 16
+    for n, lab in p["proof"]:
+        b += t(n, x, H - 18, 15, c["text"], 800)
+        nw = len(n) * 9.5 + 6
+        b += mono(lab, x + nw, H - 19, c["muted"], 9.5)
+        x += nw + len(lab) * 7.4 + 20
+    defs = dots("dg", c)
+    save(p["file"], theme, svg(W, H, b, FADE_UP + astyle, f'{p["name"]}: {p["desc"]}', defs))
 
 
 # ---------------------------------------------------------------- skills
@@ -381,10 +474,12 @@ def skills(theme):
         b += t(area, x + 40, y + 29, 16, c["text"], 700)
         b += t(tools, x + 40, y + 51, 14, c["muted"])
         b += "</g>"
-    save("skills", theme, svg(W, H, b, FADE_UP, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items)))
+    framed("skills", theme, 1000, W, H, b, FADE_UP, "Skills: " + "; ".join(f"{a}: {tl}" for a, tl in items), "", "Area / tools", "")
 
 
 if __name__ == "__main__":
+    PROJECTS[3]["art"] = art_nichodev
+    PROJECTS[3]["name"] = "Nicho.dev"
     if os.path.isdir(OUT):
         for f in os.listdir(OUT):
             if f.endswith(".svg"):
@@ -392,8 +487,11 @@ if __name__ == "__main__":
     print("writing assets:")
     for th in THEMES:
         hero(th)
-        label("label-work", "01", "Selected work", "Fig. 01–03", th)
-        label("label-skills", "02", "Skills", "Area / tools", th)
+        label("label-work", "01", "Selected work", "Fig. 01–04", th)
+        label("label-skills", "02", "Skills", "What I build with", th)
+        nav("nav-portfolio", "Portfolio", "nicho-dev.vercel.app", "Case studies and the 3D room", th)
+        nav("nav-email", "Direct line", "Email me", "neckolescano36@gmail.com", th)
+        nav("nav-kuwago", "Live app", "kuwaGO", "Early access, heading to Play", th)
         for p in PROJECTS:
-            work(p, th)
+            card(p, th)
         skills(th)
